@@ -5,7 +5,6 @@
 The activities resource represents actions or events associated with a specific client.
 An activity cannot exist independently and is always scoped to a client.
 
----
 
 ## Endpoints
 
@@ -24,7 +23,6 @@ List all activities associated with a given client.
 - 403 Forbidden
 - 404 Not Found
 
----
 
 ### POST /api/v1/clients/{clientId}/activities
 
@@ -42,7 +40,6 @@ Create a new activity for a given client.
 - 404 Not Found
 - 422 Unprocessable Entity
 
----
 
 ### GET /api/v1/clients/{clientId}/activities/{activityId}
 
@@ -59,7 +56,6 @@ Retrieve a single activity by its identifier within the context of a client.
 - 403 Forbidden
 - 404 Not Found
 
----
 
 ### PUT /api/v1/clients/{clientId}/activities/{activityId}
 
@@ -77,7 +73,6 @@ Update an existing activity.
 - 404 Not Found
 - 422 Unprocessable Entity
 
----
 
 ### DELETE /api/v1/clients/{clientId}/activities/{activityId}
 
