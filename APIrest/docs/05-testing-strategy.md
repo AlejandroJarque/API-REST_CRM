@@ -1,31 +1,36 @@
 # Testing Strategy (TDD)
 
 ## Principles
+
 - Tests are the source of truth for the project.
-
 - No endpoint is considered finished without tests.
-
 - Behavior is defined before implementation.
+- Manual testing is not a validation mechanism.
 
-## Types of Tests
-- Functional tests:
+## Testing framework
 
-- Required per endpoint.
+- The project uses PHPUnit as the only testing framework.
+- PHPUnit is natively integrated with Laravel and provides explicit, predictable tests.
+- Mixing testing frameworks is not allowed.
 
-- Validate status codes, responses, and authorization.
+## Testing environment
 
-- Unit tests:
+All tests run in a dedicated testing environment:
 
-- Only when complex business logic exists.
+- APP_ENV=testing
+- Isolated database
+- Ephemeral cache, session, and queue drivers
+- No dependency on external services
 
-## Rules
-- If it's not tested, it doesn't exist.
+The testing environment is:
 
-- Tests must be able to detect regressions.
+- Reproducible
+- Disposable
+- Safe (cannot affect local or development data)
 
-## Discarded Alternative
-- Writing tests at the end:
+## Running tests
 
-- Generates technical debt.
+The test suite is executed using:
 
-- Doesn't validate security or contracts from the beginning.
+```bash
+php artisan test
