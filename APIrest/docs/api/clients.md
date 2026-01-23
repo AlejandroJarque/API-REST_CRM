@@ -5,7 +5,6 @@
 The clients resource represents a collection of clients managed by the system.
 Each client belongs to a user, unless accessed by an admin with global privileges.
 
----
 
 ## Endpoints
 
@@ -23,7 +22,6 @@ List all clients accessible to the authenticated user.
 - 401 Unauthorized
 - 403 Forbidden
 
----
 
 ### POST /api/v1/clients
 
@@ -39,7 +37,6 @@ Create a new client.
 - 401 Unauthorized
 - 422 Unprocessable Entity
 
----
 
 ### GET /api/v1/clients/{clientId}
 
@@ -56,7 +53,6 @@ Retrieve a single client by its identifier.
 - 403 Forbidden
 - 404 Not Found
 
----
 
 ### PUT /api/v1/clients/{clientId}
 
@@ -74,7 +70,6 @@ Update an existing client.
 - 404 Not Found
 - 422 Unprocessable Entity
 
----
 
 ### DELETE /api/v1/clients/{clientId}
 

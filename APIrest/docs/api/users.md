@@ -5,7 +5,6 @@
 The users resource represents system users.
 The API clearly distinguishes between self-service operations and administrative operations.
 
----
 
 ## Endpoints
 
@@ -22,7 +21,6 @@ Retrieve the profile of the authenticated user.
 - 200 OK
 - 401 Unauthorized
 
----
 
 ### PUT /api/v1/users/me
 
@@ -38,7 +36,6 @@ Update the profile of the authenticated user.
 - 401 Unauthorized
 - 422 Unprocessable Entity
 
----
 
 ### GET /api/v1/users
 

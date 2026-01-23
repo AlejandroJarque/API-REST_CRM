@@ -7,8 +7,6 @@ All endpoints must comply with the rules described here.
 
 The goal is to provide a consistent and predictable error model for all API consumers.
 
----
-
 ## Authentication Errors
 
 ### 401 Unauthorized
@@ -21,7 +19,6 @@ Typical scenarios:
 
 The client is expected to authenticate before retrying the request.
 
----
 
 ## Authorization Errors
 
@@ -33,7 +30,6 @@ Typical scenarios:
 - User attempts to access a resource they do not own
 - User role does not allow the operation
 
----
 
 ## Resource Errors
 
@@ -45,7 +41,6 @@ This includes cases where the resource exists but the user is not authorized to 
 
 This behavior prevents information leakage.
 
----
 
 ## Validation Errors
 
@@ -58,7 +53,6 @@ Typical scenarios:
 - Invalid field formats
 - Business rule violations
 
----
 
 ## Successful Operations
 
@@ -68,7 +62,6 @@ The API uses the following status codes for successful operations:
 - 201 Created: Resource successfully created
 - 204 No Content: Resource successfully deleted
 
----
 
 ## Consistency Rules
 
