@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\Client;
 use App\Models\Activity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Notifications\Action;
 
 class ActivityPolicyTest extends TestCase
 {

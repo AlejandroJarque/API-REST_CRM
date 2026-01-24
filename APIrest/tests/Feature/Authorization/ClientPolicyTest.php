@@ -27,7 +27,7 @@ class ClientPolicyTest extends TestCase
 
     public function testAdminCanViewAnyClient(): void
     {
-        $admin = user::factory()->admin()->create();
+        $admin = User::factory()->admin()->create();
         $client = Client::factory()->create();
         $this->assertTrue($admin->can('view', $client));
     }

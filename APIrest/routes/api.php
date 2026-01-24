@@ -7,7 +7,7 @@ Route::prefix('v1')->group(function() {
 
     Route::post('/login', LoginController::class);
 
-    Route::middleware('auth')->group(function() {
+    Route::middleware('auth:api')->group(function() {
         Route::get('/me', function() {
             return response()->json([
                 'ok' => true,
