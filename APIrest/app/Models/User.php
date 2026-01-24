@@ -84,7 +84,7 @@ class User extends Authenticatable
     {
         static::saving(function(User $user) {
             if(! in_array($user->role, self::roles(), true)) {
-                throw new \InvalidArgumentException('Ivalid user role');
+                throw new \InvalidArgumentException('Invalid user role');
             }
         });
     }
