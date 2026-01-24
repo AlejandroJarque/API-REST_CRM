@@ -22,4 +22,10 @@ class ClientController extends Controller
             'data'=>$clients,
         ]);
     }
+
+    public function store(): JsonResponse
+    {
+        return response()->json([], 201);
+    }
+
 }
