@@ -7,6 +7,7 @@ use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 
 class ClientController extends Controller
@@ -23,8 +24,20 @@ class ClientController extends Controller
         ]);
     }
 
-    public function store(): JsonResponse
+    public function store(Request $request): JsonResponse
     {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'phone' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors(),
+            ], 422);
+        }
         return response()->json([], 201);
     }
 
