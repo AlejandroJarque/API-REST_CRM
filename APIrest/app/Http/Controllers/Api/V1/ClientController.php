@@ -38,7 +38,16 @@ class ClientController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        return response()->json([], 201);
+
+        $client = Client::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'phone' => $request->input('phone'),
+            'address' => $request->input('address'),
+            'user_id' => $request->user()->id,
+        ]);
+        
+        return response()->json(['data' => $client], 201);
     }
 
 }
