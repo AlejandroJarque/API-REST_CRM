@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\V1\ClientController;
 
 Route::prefix('v1')->group(function() {
 
@@ -13,6 +14,7 @@ Route::prefix('v1')->group(function() {
                 'ok' => true,
             ]);
         });
+        Route::get('/clients', [ClientController::class, 'index']);
     });
 });
 
