@@ -15,6 +15,9 @@ class ClientFactory extends Factory
     {
         return [
             'name' => fake()->company(),
+            'email' => fake()->unique()->safeColorName(),
+            'phone' => fake()->phoneNumber(),
+            'address' => fake()->address(),
             'user_id' => User::factory(),
         ];
         

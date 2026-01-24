@@ -15,9 +15,17 @@ class ActivityFactory extends Factory
     {
         return [
             'description' => fake()->sentence(),
-            'user_id' => User::factory(),
             'client_id' => Client::factory(),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterMaking(function (Activity $activity) {
+            if($activity->client && $activity->client->user_id) {
+                $activity->user_id = $activity->client->user_id;
+            }
+        });
     }
 }
 
