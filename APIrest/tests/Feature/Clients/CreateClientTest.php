@@ -47,7 +47,7 @@ class CreateClientTest extends TestCase
             'address' => 'Main Street 1',
         ];
 
-        $response = $this->actingAs($user, 'api')->postJson('api/v1/clients', $payload);
+        $response = $this->actingAs($user, 'api')->postJson('/api/v1/clients', $payload);
         $response->assertStatus(201);
 
         $this->assertDatabaseHas('clients', [
