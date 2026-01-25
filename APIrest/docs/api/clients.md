@@ -54,7 +54,7 @@ Retrieve a single client by its identifier.
 - 404 Not Found
 
 
-### PUT /api/v1/clients/{clientId}
+### PATCH /api/v1/clients/{clientId}
 
 **Purpose**  
 Update an existing client.
@@ -85,3 +85,75 @@ Delete an existing client.
 - 401 Unauthorized
 - 403 Forbidden
 - 404 Not Found
+
+
+## Request Payloads and Validation
+
+### Create Client (POST)
+
+Accepted fields:
+
+- `name` (required, string)
+- `email` (required, valid email)
+- `phone` (optional, string)
+- `address` (optional, string)
+
+Notes:
+- `user_id` is NOT accepted from the request body.
+- Ownership is always assigned from the authenticated user.
+
+Validation Errors:
+- Invalid payload returns **422 Unprocessable Entity**.
+
+### Update Client (PATCH)
+
+Partial updates are supported.
+
+Accepted fields (all optional):
+
+- `name` (string)
+- `email` (valid email)
+- `phone` (string)
+- `address` (string)
+
+Validation Errors:
+- Invalid fields return **422 Unprocessable Entity**.
+
+
+## Error Handling Strategy
+
+The following rules apply consistently to all client endpoints:
+
+- **401 Unauthorized**
+  - Request without a valid access token.
+
+- **403 Forbidden**
+  - Authenticated user attempting to access a client they do not own.
+  - Applies even if the resource exists.
+
+- **404 Not Found**
+  - Client does not exist.
+  - Handled automatically by route model binding.
+
+- **422 Unprocessable Entity**
+  - Validation errors.
+  - Takes precedence over authorization errors for authenticated users.
+
+cat >> docs/api/clients.md <<'MD'
+
+
+## Testing as Contract
+
+The behavior described in this document is enforced by automated feature tests.
+
+Tests cover:
+
+- Authentication requirements
+- Ownership and role-based authorization
+- Correct HTTP status codes
+- Validation rules
+- Database side effects
+
+No endpoint is considered valid unless all related tests are passing.
+
+
