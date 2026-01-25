@@ -38,8 +38,10 @@ class ClientController extends Controller
 
     public function show(Client $client): JsonResponse
     {
+        $this->authorize('view', $client);
+        
         return response()->json([
-            'data' => [],
+            'data' => $client,
         ]);
     }
 }
