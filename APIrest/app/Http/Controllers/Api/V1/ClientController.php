@@ -44,4 +44,9 @@ class ClientController extends Controller
             'data' => $client,
         ]);
     }
+
+    public function update(Client $client): JsonResponse
+    {
+        return response()->json([]);
+    }
 }
