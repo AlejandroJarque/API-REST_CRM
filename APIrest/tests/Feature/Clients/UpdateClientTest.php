@@ -35,7 +35,7 @@ class UpdateClientTest extends TestCase
         $client = Client::factory()->for($user)->create();
 
         $response = $this->actingAs($user, 'api')->patchJson("/api/v1/clients/{$client->id}",['email' => 'not-an-email',]);
-        $response->assertStauts(422);
+        $response->assertStatus(422);
     }
 
     public function testUserCanUpdateOwnClient(): void
