@@ -36,4 +36,10 @@ class ClientController extends Controller
         return response()->json(['data' => $client], 201);
     }
 
+    public function show(Client $client): JsonResponse
+    {
+        return response()->json([
+            'data' => [],
+        ]);
+    }
 }

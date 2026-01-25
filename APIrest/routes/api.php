@@ -16,6 +16,7 @@ Route::prefix('v1')->group(function() {
         });
         Route::get('/clients', [ClientController::class, 'index']);
         Route::post('/clients', [ClientController::class, 'store']);
+        Route::get('/clients/{client}', [ClientController::class, 'show']);
     });
 });
 
