@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClientRequest;
+use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,9 +46,12 @@ class ClientController extends Controller
         ]);
     }
 
-    public function update(Client $client): JsonResponse
+    public function update(UpdateClientRequest $request, Client $client): JsonResponse
     {
         $this->authorize('update', $client);
-        return response()->json([]);
+
+        $client->update($request->validated());
+
+        return response()->json(['data' => $client,]);
     }
 }
