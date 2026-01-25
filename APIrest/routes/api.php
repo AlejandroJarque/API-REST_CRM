@@ -18,7 +18,7 @@ Route::prefix('v1')->group(function() {
         Route::post('/clients', [ClientController::class, 'store']);
         Route::get('/clients/{client}', [ClientController::class, 'show']);
         Route::patch('/clients/{client}', [ClientController::class, 'update']);
-
+        Route::delete('/clients/{client}', [ClientController::class, 'destroy']);
     });
 });
 

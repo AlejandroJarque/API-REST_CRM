@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 
 
@@ -53,5 +54,12 @@ class ClientController extends Controller
         $client->update($request->validated());
 
         return response()->json(['data' => $client,]);
+    }
+
+    public function destroy(Client $client): Response
+    {
+        $this->authorize('delete', $client);
+        $client->delete();
+        return response()->noContent();
     }
 }
