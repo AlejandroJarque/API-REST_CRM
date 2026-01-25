@@ -47,6 +47,7 @@ class ClientController extends Controller
 
     public function update(Client $client): JsonResponse
     {
+        $this->authorize('update', $client);
         return response()->json([]);
     }
 }
