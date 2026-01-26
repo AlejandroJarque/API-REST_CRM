@@ -16,6 +16,7 @@ Route::prefix('v1')->group(function() {
         });
 
         Route::get('/activities', [ActivityController::class, 'index']);
+        Route::post('/activities', [ActivityController::class, 'store']);
     });
 });
 

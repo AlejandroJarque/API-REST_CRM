@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Activity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreActivityRequest;
 
 class ActivityController extends Controller
 {
@@ -24,5 +26,21 @@ class ActivityController extends Controller
         return response()->json([
             'data' => $activities,
         ]);
+    }
+
+    public function store(StoreActivityRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $client = Client::findOrFail($validated['client_id']);
+
+        $this->authorize('create', [\App\Models\Activity::class, $client]);
+
+        $activity = \App\Models\Activity::create([
+            'description' => $validated['description'],
+            'client_id' => $client->id,
+            'user_id' => $client->user_id,
+        ]);
+
+        return response()->json(['data' => $activity], 201);
     }
 }

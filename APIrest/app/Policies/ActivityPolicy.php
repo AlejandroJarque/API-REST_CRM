@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Activity;
 use App\Models\User;
+use App\Models\Client;
 use Illuminate\Auth\Access\Response;
 
 class ActivityPolicy
@@ -25,9 +26,13 @@ class ActivityPolicy
     }
 
     
-    public function create(User $user): bool
+    public function create(User $user, Client $client): bool
     {
-        return false;
+        if($user->isAdmin()) {
+            return true;
+        }
+
+        return $client->user_id === $user->id;
     }
 
     
