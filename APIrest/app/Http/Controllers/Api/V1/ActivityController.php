@@ -43,4 +43,13 @@ class ActivityController extends Controller
 
         return response()->json(['data' => $activity], 201);
     }
+
+    public function show(Activity $activity): JsonResponse
+    {
+        $this->authorize('view', $activity);
+
+        return  response()->json([
+            'data' => $activity,
+        ]);
+    }
 }
