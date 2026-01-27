@@ -28,4 +28,22 @@ class UpdateActivityTest extends TestsTestCase
             'description' => 'New description',
         ])->assertStatus(401);
     }
+
+    public function testUserCannotUpdateActivityOfForeignClient(): void
+    {
+        $user = User::factory()->create();
+
+        $foreignClient = Client::factory()->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $foreignClient->id,
+            'user_id' => $foreignClient->user_id,
+            'description' => 'Old description',
+        ]);
+
+        $this->actingAs($user, 'api')
+             ->patchJson("/api/v1/activities/{$activity->id}", [
+                'description' => 'New description',
+            ])->assertStatus(403);
+    }
 }

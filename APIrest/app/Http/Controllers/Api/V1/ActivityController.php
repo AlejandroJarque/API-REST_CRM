@@ -55,6 +55,8 @@ class ActivityController extends Controller
 
     public function update(Request $request, Activity $activity): JsonResponse
     {
+        $this->authorize('update', $activity);
+        
         return response()->json(['data' => $activity], 200);
     }
 }
