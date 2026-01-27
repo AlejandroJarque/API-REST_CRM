@@ -52,4 +52,9 @@ class ActivityController extends Controller
             'data' => $activity,
         ]);
     }
+
+    public function update(Request $request, Activity $activity): JsonResponse
+    {
+        return response()->json(['data' => $activity], 200);
+    }
 }
