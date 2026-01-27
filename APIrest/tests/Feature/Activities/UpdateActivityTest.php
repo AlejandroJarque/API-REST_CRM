@@ -26,6 +26,6 @@ class UpdateActivityTest extends TestsTestCase
 
         $this->patchJson("/api/v1/activities/{$activity->id}", [
             'description' => 'New description',
-        ])->asseertStatus(401);
+        ])->assertStatus(401);
     }
 }
