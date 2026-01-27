@@ -22,6 +22,14 @@ Errors must include:
 - A clear message for the frontend
 - Useful information for debugging (when applicable)
 
+/*```json
+{
+  "message": "string",
+  "details": null | { "fields": { "field": ["error"] } }
+}
+*/
+
+
 ## Rationale
 - Allows the frontend to handle errors deterministically.
 
