@@ -24,4 +24,20 @@ class DeleteActivityTest extends TestCase
         $this->deleteJson("/api/v1/activities/{$activity->id}")
             ->assertStatus(401);
     }
+
+    public function testUserCannotDeleteActivityOfForeignClient(): void
+    {
+        $user = User::factory()->create();
+
+        $foreignClient = Client::factory()->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $foreignClient->id,
+            'user_id' => $foreignClient->user_id,
+        ]);
+
+        $this->actingAs($user, 'api')
+            ->deleteJson("api/v1/activities/{$activity->id}")
+            ->assertStatus(403);
+    }
 }
