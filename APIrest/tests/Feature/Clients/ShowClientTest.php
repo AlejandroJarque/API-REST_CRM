@@ -23,7 +23,7 @@ class ShowClientTest extends TestCase
         $user = User::factory()->create();
         $client = Client::factory()->create();
         $response = $this->actingAs($user, 'api')->getJson("/api/v1/clients/{$client->id}");
-        $response->assertStatus(403);
+        $this->assertApiError($response, 403);
     }
 
     public function testUserCanViewOwnClient(): void

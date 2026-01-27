@@ -78,8 +78,9 @@ class ShowActivityTest extends TestCase
 
         $nonExistingId = 999999;
 
-        $this->actingAs($user, 'api')
-            ->getJson("/api/v1/activities/{$nonExistingId}")
-            ->assertStatus(404);
+        $response = $this->actingAs($user, 'api')
+            ->getJson("/api/v1/activities/{$nonExistingId}");
+            
+        $this->assertApiError($response, 404);
     }
 }
