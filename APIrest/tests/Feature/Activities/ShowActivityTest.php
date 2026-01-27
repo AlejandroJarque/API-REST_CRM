@@ -71,4 +71,15 @@ class ShowActivityTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('data.id', $activity->id);
     }
+
+    public function testReturns404WhenActivityDoesNotExist(): void
+    {
+        $user = User::factory()->create();
+
+        $nonExistingId = 999999;
+
+        $this->actingAs($user, 'api')
+            ->getJson("/api/v1/activities/{$nonExistingId}")
+            ->assertStatus(404);
+    }
 }
