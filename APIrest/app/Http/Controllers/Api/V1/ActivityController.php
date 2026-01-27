@@ -59,6 +59,8 @@ class ActivityController extends Controller
     {
         $this->authorize('update', $activity);
 
+        $activity->update($request->validated());
+
         return response()->json(['data' => $activity], 200);
     }
 

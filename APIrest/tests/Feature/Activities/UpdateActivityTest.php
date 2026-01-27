@@ -64,4 +64,49 @@ class UpdateActivityTest extends TestsTestCase
                 'description' => '',
             ])->assertStatus(422);
     }
+
+    public function testOwnerCanUpdateActivity(): void
+    {
+        $user = User::factory()->create();
+        $client = Client::factory()->for($user)->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $client->id,
+            'user_id' => $client->user_id,
+            'description' => 'Old description',
+        ]);
+
+        $this->actingAs($user, 'api')
+            ->patchJson("/api/v1/activities/{$activity->id}", [
+                'description' => 'Updated description',
+            ])->assertStatus(200);
+
+        $this->assertDatabaseHas('activities', [
+            'id' => $activity->id,
+            'description' => 'Updated description',
+        ]);
+    }
+
+    public function testAdminCanUpdateAnyActivity(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $client = Client::factory()->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $client->id,
+            'user_id'=> $client->user_id,
+            'description' => 'Old description',
+        ]);
+
+        $this->actingAs($admin,'api')
+            ->patchJson("/api/v1/activities/{$activity->id}", [
+                'description' => 'Admin updated description',
+            ])->assertStatus(200);
+
+        $this->assertDatabaseHas('activities', [
+            'id' => $activity->id,
+            'description' => 'Admin updated description',
+        ]);
+    }
 }
