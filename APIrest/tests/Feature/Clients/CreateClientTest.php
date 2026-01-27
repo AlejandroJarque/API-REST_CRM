@@ -34,7 +34,7 @@ class CreateClientTest extends TestCase
 
         $response = $this->actingAs($user, 'api')->postJson('/api/v1/clients', $payload);
 
-        $response->assertStatus(422);
+        $this->assertApiError($response, 422, true);
     }
 
     public function testUserCanCreateClient(): void

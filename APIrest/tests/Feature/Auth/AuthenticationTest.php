@@ -11,13 +11,13 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_access_without_token_unauthorized(): void
+    public function testAccessWithoutTokenUnauthorized(): void
     {
         $response = $this->getJson('/api/v1/me');
-        $response->assertStatus(401);
+        $this->assertApiError($response, 401);
     }
 
-    public function test_access_with_token_authorized(): void
+    public function testAccessWithTokenAuthorized(): void
     {
         $user = User::factory()->create();
 
