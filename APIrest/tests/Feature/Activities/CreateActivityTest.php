@@ -31,12 +31,14 @@ class CreateActivityTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user, 'api')
+        $response=$this->actingAs($user, 'api')
             ->postJson('/api/v1/activities', [
                 'description' => 'Call notes',
-            ])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['client_id']);
+            ]);
+        
+        $this->assertApiError($response, 422, true);
+
+        $response->assertJsonPath('details.fields.client_id', fn($value) => is_array($value));
     }
 
     public function testUserCannotCreateActivityForForeignClient(): void
