@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Client;
 use App\Models\Activity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreActivityRequest;
+use App\Http\Requests\UpdateActivityRequest;
 
 class ActivityController extends Controller
 {
@@ -53,10 +55,12 @@ class ActivityController extends Controller
         ]);
     }
 
-    public function update(Request $request, Activity $activity): JsonResponse
+    public function update(UpdateActivityRequest $request, Activity $activity): JsonResponse
     {
         $this->authorize('update', $activity);
-        
+
         return response()->json(['data' => $activity], 200);
     }
+
+    
 }

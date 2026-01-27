@@ -46,4 +46,22 @@ class UpdateActivityTest extends TestsTestCase
                 'description' => 'New description',
             ])->assertStatus(403);
     }
+
+    public function testUpdateActivityWithInvalidPayloadReturns422(): void
+    {
+        $user = User::factory()->create();
+
+        $client = Client::factory()->for($user)->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $client->id,
+            'user_id' => $client->user_id,
+            'description' => 'Old description',
+        ]);
+
+        $this->actingAs($user, 'api')
+            ->patchJson("/api/v1/activities/{$activity->id}", [
+                'description' => '',
+            ])->assertStatus(422);
+    }
 }
