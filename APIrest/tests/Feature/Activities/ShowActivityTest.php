@@ -55,4 +55,20 @@ class ShowActivityTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('data.id', $activity->id);
     }
+
+    public function testAdminCanViewAnyActivity(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $client = Client::factory()->create();
+
+        $activity = Activity::factory()->create([
+            'client_id'=> $client->id,
+            'user_id' => $client->user_id,
+        ]);
+
+        $this->actingAs($admin, 'api')
+            ->getJson("/api/v1/activities/{$activity->id}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', $activity->id);
+    }
 }
