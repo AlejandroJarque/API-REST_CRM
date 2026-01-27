@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function() {
         Route::post('/activities', [ActivityController::class, 'store']);
         Route::get('/activities/{activity}', [ActivityController::class, 'show']);
         Route::patch('/activities/{activity}', [ActivityController::class, 'update']);
+        Route::delete('/activities/{activity}', [ActivityController::class, 'destroy']);
     });
 });
 

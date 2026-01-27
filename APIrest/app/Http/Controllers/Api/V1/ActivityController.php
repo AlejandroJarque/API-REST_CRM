@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreActivityRequest;
 use App\Http\Requests\UpdateActivityRequest;
+use Illuminate\Http\Response;
 
 class ActivityController extends Controller
 {
@@ -62,6 +63,11 @@ class ActivityController extends Controller
         $activity->update($request->validated());
 
         return response()->json(['data' => $activity], 200);
+    }
+
+    public function destroy(Activity $activity): Response
+    {
+        return response()->noContent();
     }
 
     
