@@ -26,4 +26,17 @@ class ShowActivityTest extends TestCase
             ->getJson("api/v1/activities/{$activity->id}")
             ->assertStatus(403);
     }
+
+    public function testGuestCannotViewActivity(): void
+    {
+        $client = Client::factory()->create();
+
+        $activity = Activity::factory()->create([
+            'client_id' => $client->id,
+            'user_id' => $client->user_id,
+        ]);
+
+        $this->getJson("/api/v1/activities/{$activity->id}")
+            ->assertStatus(401);
+    }
 }
