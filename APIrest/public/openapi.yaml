@@ -316,7 +316,57 @@ paths:
           description: Not autenticated
         '403':
           description: Without enough permissions
-
+    post:
+      summary: Create activity
+      description: |
+        Create a new activity associated with a client.
+          - Users with the `admin` role can create activities for any client.
+          - Users with the `user` role can only create activities associated with clients they own.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - client_id
+              properties:
+                title:
+                  type: string
+                  example: Follow up call
+                description:
+                  type: string
+                  example: Call the client to confirm requirements
+                client_id:
+                  type: integer
+                  example: 5
+      responses:
+        '201': 
+          description: Activity created succsesfully
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  title:
+                    type: string
+                    example: Follow up call
+                  description:
+                    type: string
+                    example: Call client to confirm requirements.
+                  client_id:
+                    type: integer
+                    example: 5
+          '401':
+            description: Not autenticated
+          '403':
+            description: Without enough permissions
+          '422':
+            description: Validation error
 
 
 
