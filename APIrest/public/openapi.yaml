@@ -210,6 +210,57 @@ paths:
           description: Without enough permissions
         '404':
           description: Client not found
+    patch:
+      summary: Update client
+      description: |
+        Partially update an existing client.
+          - Users with the `admin` role can update any client.
+          - Users with the `user` role can only update clients they own.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Acme Corp Updated
+                email:
+                  type: string
+                  example: Updated@acme.com
+      responses:
+        '200':
+          description: Client updated sucssesfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name: 
+                    type: string
+                    example: Acme Corp Updated
+                  email:
+                    type: string
+                    example: updated@acme.com
+        '401':
+          description: Not autenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Client not found
+        '422':
+          description: Validation error
 
 
 
