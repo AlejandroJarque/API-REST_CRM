@@ -283,6 +283,39 @@ paths:
           description: Without enough permissions
         '404':
           description: Client not found
+  /activities:
+    get:
+      summary: List activities
+      description: |
+        Returns the list of activities accessible to the authenticated user.
+          - Users with the `admin` role see all activities.
+          - Users with the `user` role only see their own activities.
+      responses:
+        '200':
+          description: Activities list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: Follow up call
+                    description:
+                      type: string
+                      example: Follow up call to client
+                    client_id:
+                      type: integer
+                      example: 5
+        '401':
+          description: Not autenticated
+        '403':
+          description: Without enough permissions
 
 
 
