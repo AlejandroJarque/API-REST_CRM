@@ -128,4 +128,51 @@ paths:
           description: Not authenticated.
         '403':
           description: Without enough permissions.
+    post:
+      summary: Client create
+      description: |
+        Create a new client.
+          - Users with the `admin` role can create clients.
+          - Users with the `user` role can only create clients associated with themselves.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  example: Acme CORP
+                email:
+                  type: string
+                  example: contact@acme.com
+      responses:
+        '201':
+          description: Client created sucssesfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: Acme Corp 
+                  email:
+                    type: string
+                    example: contact@acme.com
+        '401':
+          description: Not authenticated
+        '403':
+          description: Without enough permissions
+        '422':
+          description: Validation error
+
+
 
