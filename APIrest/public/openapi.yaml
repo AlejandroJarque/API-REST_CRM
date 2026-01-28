@@ -407,6 +407,65 @@ paths:
           description: Without enough permissions
         '404':
           description: Activity not found
+    patch:
+      summary: Update activity
+      description: |
+        Partially updates an existing activity.
+        - Users with the `admin` role can update any activity.
+        - Users with the `user` role can only update activities they own.
+      paramerters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        contact:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Follow up call updated
+                description:
+                  type:
+                  example: We spoke with the client and agreed to a future meeting.
+                client_id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Activity updated succsesfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  title:
+                    type: string
+                    example: Follow up call updated
+                  description:
+                    type: string
+                    example: We spoke with the client and agreed to a future meeting.
+                  client_id:
+                    type: integer
+                    example: 5
+        '401':
+          description: Not autenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Activity not found
+        '422':
+          description: Validation error
+
+
 
 
 
