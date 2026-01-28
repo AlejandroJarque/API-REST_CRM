@@ -4,4 +4,73 @@ info:
   version: "1.0.0"
 servers:
   - url: /api/v1
-paths: {}
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - BrearerAuth: []
+paths: 
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user and returns an access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: object
+                  required:
+                    - email
+                    - password
+                  properties:
+                    email:
+                      type: string
+                      example: password
+      response:
+        '200':
+          description: Correct login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOi...
+        '401':
+          description: Invalid credentials
+  /me:
+    get:
+      summary: Autenticated usser
+      description: Returns the data of the authenticated user.
+      responses:
+        '200':
+          description: Autenticated usser
+          content:
+            application/join:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: Jhon description
+                  email:
+                    type: string
+                    example: john@example.components
+        '401':
+          description: No authenticated
+
