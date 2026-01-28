@@ -2,10 +2,31 @@ openapi: 3.0.3
 info:
   title: CRM API
   version: "1.0.0"
+  description: |
+    CRM REST API
+
+    Authorization:
+    - Protected endpoints require authentication using a Bearer token.
+    - Users with the `admin` role can access all resources.
+    - Users with the `user` role can only access resources they own.
+    - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
+    
 servers:
   - url: /api/v1
 components:
   securitySchemes:
+    schemas:
+      Role:
+        type: string
+        description: |
+          User autenticated Role
+
+          Possible Roles:
+            - admin: completly access to all resources.
+            - user: limited acces to his own resources.
+        enum:
+          - admin
+          - user
     BearerAuth:
       type: http
       scheme: bearer
@@ -71,6 +92,8 @@ paths:
                   email:
                     type: string
                     example: john@example.components
+                  role:
+                    $ref: '#/components/schemas/Role'
         '401':
           description: No authenticated
 
