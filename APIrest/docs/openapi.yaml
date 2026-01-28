@@ -367,6 +367,48 @@ paths:
             description: Without enough permissions
           '422':
             description: Validation error
+  /activities/{id}:
+    get:
+      summary: Get activity
+      description: |
+        Returns a specific activity by ID.
+        - Users with the `admin` role can access any activity.
+        - Users with the `user` role can only access activities they own.
+      paramerters:
+        - name: id
+          in: path
+          requiere: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Activity found succsesfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  title:
+                    type: string
+                    example: Follow up call
+                  description:
+                    type: string
+                    example: Follow up call to client
+                  client_id:
+                    type: integer
+                    example: 5
+        '401':
+          description: Not authenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Activity not found
+
+
 
 
 
