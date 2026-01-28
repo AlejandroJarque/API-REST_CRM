@@ -8,7 +8,7 @@ info:
     Authorization:
     - Protected endpoints require authentication using a Bearer token.
     - Users with the `admin` role can access all resources.
-    - Users with the `user` role can only access resources they own.
+    - Regular `user` role can only access resources they own.
     - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
 
 servers:
@@ -95,7 +95,37 @@ paths:
                   role:
                     $ref: '#/components/schemas/Role'
         '401':
-          description: No authenticated
+          description: Not authenticated
         '403':
           description: Authenticated user without sufficient permissions.
+  /clients:
+    get:
+      summary: List clients
+      description: |
+        Returns the list of clients accessible to the authenticated user.
+          - Users with the `admin` role see all clients.
+          - Users with the `user` role only see their own clients.
+      responses:
+        '200': 
+          description: Clients list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: Acme CORP
+                    email:
+                      type: string
+                      example: contact@acme.com
+        '401':
+          description: Not authenticated.
+        '403':
+          description: Without enough permissions.
 
