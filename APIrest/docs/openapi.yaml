@@ -6,11 +6,21 @@ info:
   description: |
     CRM REST API.
 
+    This API provides access to a CRM system that manages clients and their related activities.
+
     Authorization:
     - Protected endpoints require authentication using a Bearer token.
+
     - Users with the `admin` role can access all resources.
+
     - Users with the `user` role can only access resources they own.
+
     - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
+
+
+    The API uses standard HTTP status codes and returns JSON error responses.
+
+    See `/docs` folder in the repository for architectural decisions.
 
 servers:
   - url: /api/v1
