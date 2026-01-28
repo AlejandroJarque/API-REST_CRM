@@ -25,6 +25,16 @@ info:
 servers:
   - url: /api/v1
 
+tags:
+  - name: Authentication
+    description: User authentication and identity endpoints.
+
+  - name: Clients
+    description: Client management and client-related operations.
+
+  - name: Activities
+    description: Activity management and activity-related operations.
+
 components:
   securitySchemes:
     BearerAuth:
@@ -67,6 +77,8 @@ paths:
   /login:
     post:
       summary: User login
+      tags: 
+        - Authentication
       description: Authenticates a user and returns an access token.
       security: []
       requestBody:
@@ -106,6 +118,8 @@ paths:
   /me:
     get:
       summary: Authenticated user
+      tags:
+        - Authentication
       description: Returns the data of the authenticated user.
       responses:
         '200':
@@ -142,6 +156,8 @@ paths:
   /clients:
     get:
       summary: List clients
+      tags:
+        - Clients
       description: |
         Returns the list of clients accessible to the authenticated user.
         - Admin users see all clients.
@@ -172,6 +188,8 @@ paths:
 
     post:
       summary: Create client
+      tags:
+        - Clients
       description: |
         Create a new client.
         - Admin users can create clients.
@@ -223,6 +241,8 @@ paths:
   /clients/{id}:
     get:
       summary: Get client
+      tags:
+        - Clients
       description: Returns a specific client by ID.
       parameters:
         - name: id
@@ -253,6 +273,8 @@ paths:
 
     patch:
       summary: Update client
+      tags:
+        - Clients
       description: Partially update an existing client.
       parameters:
         - name: id
@@ -285,6 +307,8 @@ paths:
 
     delete:
       summary: Delete client
+      tags:
+        - Clients
       description: Delete an existing client.
       parameters:
         - name: id
@@ -305,6 +329,8 @@ paths:
   /activities:
     get:
       summary: List activities
+      tags:
+        - Activities
       description: Returns the list of activities accessible to the authenticated user.
       responses:
         '200':
@@ -331,6 +357,8 @@ paths:
 
     post:
       summary: Create activity
+      tags:
+        - Activities
       description: Create a new activity associated with a client.
       requestBody:
         required: true
@@ -361,6 +389,8 @@ paths:
   /activities/{id}:
     get:
       summary: Get activity
+      tags:
+        - Activities
       description: Returns a specific activity by ID.
       parameters:
         - name: id
@@ -380,6 +410,8 @@ paths:
 
     patch:
       summary: Update activity
+      tags:
+        - Activities
       description: Partially updates an existing activity.
       parameters:
         - name: id
@@ -414,6 +446,8 @@ paths:
 
     delete:
       summary: Delete activity
+      tags:
+        - Activities
       description: Delete an existing activity.
       parameters:
         - name: id
