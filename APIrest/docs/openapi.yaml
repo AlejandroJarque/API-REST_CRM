@@ -261,6 +261,29 @@ paths:
           description: Client not found
         '422':
           description: Validation error
+    delete:
+      summary: Delete client
+      description: |
+        Delete an existing client.
+          - Users with the `admin` role can delete any client.
+          - Users with the `user` role can only delete clients they own.
+      paramerters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Client deleted succsesfully
+        '401':
+          description: Not autenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Client not found
+
 
 
 
