@@ -1,39 +1,59 @@
 openapi: 3.0.3
+
 info:
   title: CRM API
   version: "1.0.0"
   description: |
-    CRM REST API
+    CRM REST API.
 
     Authorization:
     - Protected endpoints require authentication using a Bearer token.
     - Users with the `admin` role can access all resources.
-    - Regular `user` role can only access resources they own.
+    - Users with the `user` role can only access resources they own.
     - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
 
 servers:
   - url: /api/v1
+
 components:
   securitySchemes:
-    schemas:
-      Role:
-        type: string
-        description: |
-          User autenticated Role
-
-          Possible Roles:
-            - admin: completly access to all resources.
-            - user: limited acces to his own resources.
-        enum:
-          - admin
-          - user
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  schemas:
+    Role:
+      type: string
+      description: User authenticated role.
+      enum:
+        - admin
+        - user
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Unauthenticated.
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+
 security:
-  - BrearerAuth: []
-paths: 
+  - BearerAuth: []
+
+paths:
   /login:
     post:
       summary: User login
@@ -50,15 +70,12 @@ paths:
                 - password
               properties:
                 email:
-                  type: object
-                  required:
-                    - email
-                    - password
-                  properties:
-                    email:
-                      type: string
-                      example: password
-      response:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password
+      responses:
         '200':
           description: Correct login
           content:
@@ -71,15 +88,20 @@ paths:
                     example: eyJ0eXAiOiJKV1QiLCJhbGciOi...
         '401':
           description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /me:
     get:
-      summary: Autenticated usser
+      summary: Authenticated user
       description: Returns the data of the authenticated user.
       responses:
         '200':
-          description: Autenticated usser
+          description: Authenticated user
           content:
-            application/join:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -88,25 +110,34 @@ paths:
                     example: 1
                   name:
                     type: string
-                    example: Jhon description
+                    example: John Doe
                   email:
                     type: string
-                    example: john@example.components
+                    example: john@example.com
                   role:
                     $ref: '#/components/schemas/Role'
         '401':
           description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '403':
-          description: Authenticated user without sufficient permissions.
+          description: Authenticated user without sufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /clients:
     get:
       summary: List clients
       description: |
         Returns the list of clients accessible to the authenticated user.
-          - Users with the `admin` role see all clients.
-          - Users with the `user` role only see their own clients.
+        - Admin users see all clients.
+        - Regular users only see their own clients.
       responses:
-        '200': 
+        '200':
           description: Clients list
           content:
             application/json:
@@ -120,20 +151,21 @@ paths:
                       example: 1
                     name:
                       type: string
-                      example: Acme CORP
+                      example: Acme Corp
                     email:
                       type: string
                       example: contact@acme.com
         '401':
-          description: Not authenticated.
+          description: Not authenticated
         '403':
-          description: Without enough permissions.
+          description: Without enough permissions
+
     post:
-      summary: Client create
+      summary: Create client
       description: |
         Create a new client.
-          - Users with the `admin` role can create clients.
-          - Users with the `user` role can only create clients associated with themselves.
+        - Admin users can create clients.
+        - Regular users can only create clients associated with themselves.
       requestBody:
         required: true
         content:
@@ -146,50 +178,13 @@ paths:
               properties:
                 name:
                   type: string
-                  example: Acme CORP
+                  example: Acme Corp
                 email:
                   type: string
                   example: contact@acme.com
       responses:
         '201':
-          description: Client created sucssesfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  name:
-                    type: string
-                    example: Acme Corp 
-                  email:
-                    type: string
-                    example: contact@acme.com
-        '401':
-          description: Not authenticated
-        '403':
-          description: Without enough permissions
-        '422':
-          description: Validation error
-  /client/{id}:
-    get:
-      summary: Get client
-      description: |
-        Returns a specific client by ID.
-          - Users with the `admin` role can access any client.
-          - Users with the `user` role can only access clients they own.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          example: 1
-      responses:
-        '200':
-          description: Client found
+          description: Client created successfully
           content:
             application/json:
               schema:
@@ -208,21 +203,53 @@ paths:
           description: Not authenticated
         '403':
           description: Without enough permissions
-        '404':
-          description: Client not found
-    patch:
-      summary: Update client
-      description: |
-        Partially update an existing client.
-          - Users with the `admin` role can update any client.
-          - Users with the `user` role can only update clients they own.
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /clients/{id}:
+    get:
+      summary: Get client
+      description: Returns a specific client by ID.
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
-          example: 1
+      responses:
+        '200':
+          description: Client found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+        '401':
+          description: Not authenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Client not found
+
+    patch:
+      summary: Update client
+      description: Partially update an existing client.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -232,64 +259,43 @@ paths:
               properties:
                 name:
                   type: string
-                  example: Acme Corp Updated
                 email:
                   type: string
-                  example: Updated@acme.com
       responses:
         '200':
-          description: Client updated sucssesfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  name: 
-                    type: string
-                    example: Acme Corp Updated
-                  email:
-                    type: string
-                    example: updated@acme.com
+          description: Client updated successfully
         '401':
-          description: Not autenticated
+          description: Not authenticated
         '403':
           description: Without enough permissions
         '404':
           description: Client not found
         '422':
           description: Validation error
+
     delete:
       summary: Delete client
-      description: |
-        Delete an existing client.
-          - Users with the `admin` role can delete any client.
-          - Users with the `user` role can only delete clients they own.
-      paramerters:
+      description: Delete an existing client.
+      parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
-          example: 1
       responses:
         '204':
-          description: Client deleted succsesfully
+          description: Client deleted successfully
         '401':
-          description: Not autenticated
+          description: Not authenticated
         '403':
           description: Without enough permissions
         '404':
           description: Client not found
+
   /activities:
     get:
       summary: List activities
-      description: |
-        Returns the list of activities accessible to the authenticated user.
-          - Users with the `admin` role see all activities.
-          - Users with the `user` role only see their own activities.
+      description: Returns the list of activities accessible to the authenticated user.
       responses:
         '200':
           description: Activities list
@@ -302,26 +308,20 @@ paths:
                   properties:
                     id:
                       type: integer
-                      example: 1
                     title:
                       type: string
-                      example: Follow up call
                     description:
                       type: string
-                      example: Follow up call to client
                     client_id:
                       type: integer
-                      example: 5
         '401':
-          description: Not autenticated
+          description: Not authenticated
         '403':
           description: Without enough permissions
+
     post:
       summary: Create activity
-      description: |
-        Create a new activity associated with a client.
-          - Users with the `admin` role can create activities for any client.
-          - Users with the `user` role can only create activities associated with clients they own.
+      description: Create a new activity associated with a client.
       requestBody:
         required: true
         content:
@@ -334,158 +334,93 @@ paths:
               properties:
                 title:
                   type: string
-                  example: Follow up call
                 description:
                   type: string
-                  example: Call the client to confirm requirements
                 client_id:
                   type: integer
-                  example: 5
       responses:
-        '201': 
-          description: Activity created succsesfully
-          content: 
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  title:
-                    type: string
-                    example: Follow up call
-                  description:
-                    type: string
-                    example: Call client to confirm requirements.
-                  client_id:
-                    type: integer
-                    example: 5
-          '401':
-            description: Not autenticated
-          '403':
-            description: Without enough permissions
-          '422':
-            description: Validation error
-  /activities/{id}:
-    get:
-      summary: Get activity
-      description: |
-        Returns a specific activity by ID.
-        - Users with the `admin` role can access any activity.
-        - Users with the `user` role can only access activities they own.
-      paramerters:
-        - name: id
-          in: path
-          requiere: true
-          schema:
-            type: integer
-          example: 1
-      responses:
-        '200':
-          description: Activity found succsesfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  title:
-                    type: string
-                    example: Follow up call
-                  description:
-                    type: string
-                    example: Follow up call to client
-                  client_id:
-                    type: integer
-                    example: 5
+        '201':
+          description: Activity created successfully
         '401':
           description: Not authenticated
         '403':
           description: Without enough permissions
-        '404':
-          description: Activity not found
-    patch:
-      summary: Update activity
-      description: |
-        Partially updates an existing activity.
-        - Users with the `admin` role can update any activity.
-        - Users with the `user` role can only update activities they own.
-      paramerters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-          example: 1
-      requestBody:
-        required: true
-        contact:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                  example: Follow up call updated
-                description:
-                  type:
-                  example: We spoke with the client and agreed to a future meeting.
-                client_id:
-                  type: integer
-                  example: 5
-      responses:
-        '200':
-          description: Activity updated succsesfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 1
-                  title:
-                    type: string
-                    example: Follow up call updated
-                  description:
-                    type: string
-                    example: We spoke with the client and agreed to a future meeting.
-                  client_id:
-                    type: integer
-                    example: 5
-        '401':
-          description: Not autenticated
-        '403':
-          description: Without enough permissions
-        '404':
-          description: Activity not found
         '422':
           description: Validation error
-    delete:
-      summary: Delete activity
-      description: |
-        Delete an existing activity.
-          - Users with the `admin` role can delete any activity.
-          - Users with the `user` role can only delete activities they own.
+
+  /activities/{id}:
+    get:
+      summary: Get activity
+      description: Returns a specific activity by ID.
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: integer
-          example: 1
-      response:
-        '204':
-          description: Activity deleted succsesfully
+      responses:
+        '200':
+          description: Activity found
         '401':
           description: Not authenticated
         '403':
           description: Without enough permissions
         '404':
           description: Activity not found
+
+    patch:
+      summary: Update activity
+      description: Partially updates an existing activity.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                client_id:
+                  type: integer
+      responses:
+        '200':
+          description: Activity updated successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Activity not found
+        '422':
+          description: Validation error
+
+    delete:
+      summary: Delete activity
+      description: Delete an existing activity.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Activity deleted successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Without enough permissions
+        '404':
+          description: Activity not found
+
 
 
 
