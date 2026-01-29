@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Activity;
+use App\Application\Activities\ActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreActivityRequest;
@@ -14,17 +15,17 @@ use Illuminate\Http\Response;
 
 class ActivityController extends Controller
 {
+    public function __construct(private readonly ActivityService $activites)
+    {
+        
+    }
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Activity::class);
 
         $user = $request->user();
 
-        $activities = $user->isAdmin()
-            ? Activity::all()
-            : Activity::whereHas('client', function($q) use ($user) {
-            $q->where('user_id', $user->id);
-            })->get();
+        $activities = $this->activites->listFor($user);
         
         return response()->json([
             'data' => $activities,
@@ -38,11 +39,10 @@ class ActivityController extends Controller
 
         $this->authorize('create', [\App\Models\Activity::class, $client]);
 
-        $activity = \App\Models\Activity::create([
-            'description' => $validated['description'],
-            'client_id' => $client->id,
-            'user_id' => $client->user_id,
-        ]);
+        $activity = $this->activites->createForClient(
+            $validated['client_id'],
+            $validated
+        );
 
         return response()->json(['data' => $activity], 201);
     }
@@ -60,7 +60,7 @@ class ActivityController extends Controller
     {
         $this->authorize('update', $activity);
 
-        $activity->update($request->validated());
+        $activity = $this->activites->update($activity, $request->validated());
 
         return response()->json(['data' => $activity], 200);
     }
@@ -69,7 +69,7 @@ class ActivityController extends Controller
     {
         $this->authorize('delete', $activity);
 
-        $activity->delete();
+        $this->activites->delete($activity);
         
         return response()->noContent();
     }
