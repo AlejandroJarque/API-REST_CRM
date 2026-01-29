@@ -18,6 +18,10 @@ class ClientController extends Controller
     {
         $user = $request->user();
 
+        if(! $user) {
+            abort(401, 'Unauthenticated.');
+        }
+
         $clients = $user->role === 'admin' ? Client::all() : Client::where('user_id', $user->id)->get();
         
         return response()->json([
