@@ -361,6 +361,7 @@ components:
 
         It is optional and does not replace tests or Swagger documentation.
 
+
 security:
   - BearerAuth: []
 
