@@ -6,6 +6,8 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domain\Events\ClientCreated;
+use Illuminate\Support\Facades\Event;
 
 class CreateClientTest extends TestCase
 {
@@ -27,6 +29,8 @@ class CreateClientTest extends TestCase
 
     public function testUserCannotCreateClientWithInvalidData(): void
     {
+        Event::fake([ClientCreated::class]);
+
         $user = User::factory()->create();
         $payload = [
             'email' => 'not-an-email'
@@ -35,10 +39,14 @@ class CreateClientTest extends TestCase
         $response = $this->actingAs($user, 'api')->postJson('/api/v1/clients', $payload);
 
         $this->assertApiError($response, 422, true);
+
+        Event::assertNotDispatched(ClientCreated::class);
     }
 
     public function testUserCanCreateClient(): void
     {
+        Event::fake([ClientCreated::class]);
+
         $user = User::factory()->create();
         $payload = [
             'name' => 'Acme Corp',
@@ -54,5 +62,9 @@ class CreateClientTest extends TestCase
             'name' => 'Acme Corp',
             'user_id' => $user->id,
         ]);
+
+        Event::assertDispatched(ClientCreated::class, function (ClientCreated $event) use ($user) {
+            return $event->client->user_id === $user->id;
+        });
     }
 }

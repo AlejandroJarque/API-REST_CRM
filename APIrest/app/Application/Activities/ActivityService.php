@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Client;
 use App\Models\Activity;
 use Illuminate\Database\Eloquent\Collection;
+use App\Domain\Events\ActivityRegistered;
+use Illuminate\Support\Facades\Event;
 
 class ActivityService
 {
@@ -47,6 +49,6 @@ class ActivityService
 
     protected function onActivityCreated(Activity $activity): void
     {
-        
+        Event::dispatch(new ActivityRegistered($activity));
     }
 }

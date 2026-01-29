@@ -6,6 +6,8 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domain\Events\ActivityRegistered;
+use Illuminate\Support\Facades\Event;
 
 class CreateActivityTest extends TestCase
 {
@@ -18,6 +20,8 @@ class CreateActivityTest extends TestCase
 
     public function testCannotCreateActivityWithInvalidPayload(): void
     {
+        Event::fake([ActivityRegistered::class]);
+
         $user = User::factory()->create();
 
         $this->actingAs($user, 'api')
@@ -25,6 +29,8 @@ class CreateActivityTest extends TestCase
                 'description'=>'',
             ])
             ->assertStatus(422);
+
+        Event::assertNotDispatched(ActivityRegistered::class);
     }
 
     public function testClientIdIsRequired(): void
@@ -56,6 +62,8 @@ class CreateActivityTest extends TestCase
 
     public function testCanCreateActivityForOwnClientAndUserIdIsForcedFromClient(): void
     {
+        Event::fake([ActivityRegistered::class]);
+
         $user = User::factory()->create();
         $client = Client::factory()->for($user)->create();
 
@@ -72,6 +80,11 @@ class CreateActivityTest extends TestCase
             'user_id' => $client->user_id,
             'description'=>'Meeting notes',
         ]);
+
+        Event::assertDispatched(ActivityRegistered::class, function (ActivityRegistered $event) use ($client) {
+            return $event->activity->client_id === $client->id
+                && $event->activity->user_id === $client->user_id;
+        });
     }
 
     public function testAdminCanCreateActivityForAnyClient(): void

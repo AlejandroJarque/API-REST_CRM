@@ -5,6 +5,8 @@ namespace App\Application\Clients;
 use App\Models\User;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Event;
+use App\Domain\Events\ClientCreated;
 
 class ClientService
 {
@@ -43,6 +45,6 @@ class ClientService
 
     protected function onClientCreated(Client $client): void
     {
-        
+        Event::dispatch(new ClientCreated($client));
     }
 }
