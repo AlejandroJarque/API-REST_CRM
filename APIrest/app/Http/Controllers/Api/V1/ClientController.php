@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClientRequest;
 use App\Http\Requests\UpdateClientRequest;
 use App\Models\Client;
+use App\Application\Clients\ClientService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -14,6 +15,11 @@ use Illuminate\Http\Response;
 
 class ClientController extends Controller
 {
+    public function __construct(private readonly ClientService $clients)
+    {
+        
+    }
+
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -22,7 +28,7 @@ class ClientController extends Controller
             abort(401, 'Unauthenticated.');
         }
 
-        $clients = $user->role === 'admin' ? Client::all() : Client::where('user_id', $user->id)->get();
+        $clients = $this->clients->listFor($user);
         
         return response()->json([
             'data'=>$clients,
@@ -31,13 +37,10 @@ class ClientController extends Controller
 
     public function store(StoreClientRequest $request): JsonResponse
     {
-        $client = Client::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'user_id' => $request->user()->id,
-        ]);
+        $client = $this->clients->createFor(
+            $request->user(),
+            $request->validated()
+        );
 
         return response()->json(['data' => $client], 201);
     }
@@ -55,15 +58,17 @@ class ClientController extends Controller
     {
         $this->authorize('update', $client);
 
-        $client->update($request->validated());
+        $client = $this->clients->update($client, $request->validated());
 
-        return response()->json(['data' => $client,]);
+        return response()->json(['data' => $client]);
     }
 
     public function destroy(Client $client): Response
     {
         $this->authorize('delete', $client);
-        $client->delete();
+
+        $this->clients->delete($client);
+
         return response()->noContent();
     }
 }
