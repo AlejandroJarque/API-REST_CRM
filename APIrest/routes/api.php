@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ActivityController;
+use App\Http\Controllers\Api\V1\DashboardController;
 
 Route::prefix('v1')->group(function() {
 
@@ -16,9 +17,7 @@ Route::prefix('v1')->group(function() {
             ]);
         });
 
-    Route::get('/dashboard', function () {
-            return response()->json([]);
-    });
+    Route::get('/dashboard', DashboardController::class);
 
     Route::get('/clients', [ClientController::class, 'index']);
     Route::post('/clients', [ClientController::class, 'store']);
