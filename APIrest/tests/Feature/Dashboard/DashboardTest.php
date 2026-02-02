@@ -150,4 +150,41 @@ class DashboardTest extends TestCase
             ->assertJsonCount(1, 'pending_activities_alerts');
     }
 
+    public function testAdminSeesGlobalPendingActivities()
+    {
+        $admin = User::factory()->create([
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        $user1 = User::factory()->create(['role' => User::ROLE_USER]);
+        $user2 = User::factory()->create(['role' => User::ROLE_USER]);
+
+        $client1 = Client::factory()->create(['user_id' => $user1->id]);
+        $client2 = Client::factory()->create(['user_id' => $user2->id]);
+
+        Activity::factory()->create([
+            'client_id' => $client1->id,
+            'completed_at' => null,
+        ]);
+
+        Activity::factory()->create([
+            'client_id' => $client2->id,
+            'completed_at' => null,
+        ]);
+
+        Activity::factory()->create([
+            'client_id' => $client2->id,
+            'completed_at' => now(),
+        ]);
+
+        Passport::actingAs($admin);
+
+        $response = $this->getJson('/api/v1/dashboard');
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'pending_activities_alerts');
+    }
+
+
 }
