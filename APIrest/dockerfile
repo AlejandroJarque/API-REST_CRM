@@ -1,0 +1,24 @@
+FROM php:8.2-cli
+
+# Install system dependencies required by Laravel
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    zip \
+    libzip-dev \
+    libpq-dev \
+    sqlite3 \
+    && docker-php-ext-install pdo pdo_mysql \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Composer (from official image)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Working directory inside the container
+WORKDIR /var/www
+
+# Expose API port
+EXPOSE 8000
+
+# Default command (development environment)
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

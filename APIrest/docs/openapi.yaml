@@ -1,0 +1,753 @@
+openapi: 3.0.3
+
+info:
+  title: CRM API
+  version: "1.0.0"
+  description: |
+    CRM REST API.
+
+    This API provides access to a CRM system that manages clients and their related activities.
+
+    Authorization:
+    - Protected endpoints require authentication using a Bearer token.
+
+    - Users with the `admin` role can access all resources.
+
+    - Users with the `user` role can only access resources they own.
+
+    - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
+
+
+    The API uses standard HTTP status codes and returns JSON error responses.
+
+    See `/docs` folder in the repository for more information.
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: Authentication
+    description: Authentication and identity endpoints.
+  - name: Clients
+    description: Client management endpoints.
+  - name: Activities
+    description: Activity management endpoints.
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Role:
+      type: string
+      description: User role.
+      enum: [admin, user]
+
+    Rest principles:
+      type: object
+      description: |
+        # REST Principles
+
+        - Resource-oriented endpoints
+
+        - Stateless requests
+
+        - HTTP status codes used correctly
+
+        - No RPC-style endpoints
+
+    Api versioning:
+      type: object
+      description: |
+        # API Versioning
+
+        ## Strategy
+        - URL-based versioning
+
+        - Example: /api/v1
+
+        ## Rules
+        - No breaking changes inside a version
+
+        - New versions for incompatible changes
+
+    Error handling:
+      type: object
+      description: |
+        # Error Handling
+
+        ## Error Format
+        Errors are returned in JSON format.
+
+        ## Common Status Codes
+        - 401 Unauthorized
+
+        - 403 Forbidden
+
+        - 404 Not Found
+
+        - 422 Unprocessable Entity
+
+    Activities:
+      type: object
+      description: |
+        # Activities API Contract
+
+        ## Resource Description
+        Activities represent actions associated with a client.
+
+        ## Endpoints
+
+        ### GET /api/v1/activities
+        List all activities accessible to the authenticated user.
+
+        ### POST /api/v1/activities
+        Create a new activity.
+
+        ### GET /api/v1/activities/{activityId}
+        Retrieve a single activity by its identifier.
+
+        ### PATCH /api/v1/activities/{activityId}
+        Update an existing activity.
+
+        ### DELETE /api/v1/activities/{activityId}
+        Delete an existing activity.
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 10
+        client_id:
+          type: integer
+          example: 5
+        description:
+          type: string
+          example: "Called the client to confirm requirements"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-01-28T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-01-28T10:00:00Z"
+
+    Clients:
+      type: object
+      description: |
+        # Clients API Contract
+
+        ## Resource Description
+        The clients resource represents a collection of clients managed by the system.
+
+        ## Endpoints
+
+        ### GET /api/v1/clients
+        List all clients accessible to the authenticated user.
+
+        ### POST /api/v1/clients
+        Create a new client.
+
+        ### GET /api/v1/clients/{clientId}
+        Retrieve a single client by its identifier.
+
+        ### PATCH /api/v1/clients/{clientId}
+        Update an existing client.
+
+        ### DELETE /api/v1/clients/{clientId}
+        Delete an existing client.
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 10
+        name:
+          type: string
+          example: Acme Corp
+        email:
+          type: string
+          nullable: true
+          example: contact@acme.com
+        phone:
+          type: string
+          nullable: true
+          example: "+34 600 000 000"
+        address:
+          type: string
+          nullable: true
+          example: "Calle Mayor 1, Madrid"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-01-28T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-01-28T10:00:00Z"
+
+    Errors:
+      type: object
+      description: |
+        # Errors Reference
+
+        ## Validation Errors
+        Returned with status 422.
+
+        ## Authorization Errors
+        Returned with status 403.
+
+        ## Authentication Errors
+        Returned with status 401.
+
+    Users:
+      type: object
+      description: |
+        # Users API
+
+        Users represent authenticated identities in the system.
+
+        ## Roles
+        - user
+
+        - admin
+    
+    Security strategy:
+      type: object
+      description: |
+        # Security Strategy
+
+        ## Principles
+        - The entire API will be protected by tokens.
+
+        - Sessions are not used.
+
+        - Authentication is based on OAuth2 using Laravel Passport.
+
+        ## Separation of Duties
+        - Authentication: who you are
+
+        - Authorization: what you can do
+
+        These responsibilities should not be mixed.
+
+        ## Initial Roles
+        - user: standard authenticated user
+
+        - admin: global operational access
+
+        ## Discarded Alternatives
+        - Laravel Sanctum:
+
+          - Does not fully meet the project's OAuth2 requirements.
+
+        ## Note
+        At this point, Passport is not installed or configured. Only the architectural decision is being made.
+
+    Testing strategy:
+      type: object
+      description: |
+        # Testing Strategy
+
+        ## Objectives
+        - Ensure API correctness
+
+        - Protect business rules
+
+        - Prevent regressions
+
+        ## Testing Levels
+        - Feature tests (primary)
+
+        - Unit tests (secondary)
+
+        ## Scope
+        - Authentication
+
+        - Authorization
+
+        - Validation
+
+        - Persistence
+
+        ## Contract-Driven Tests
+        Tests define expected behavior. Documentation must never contradict tests.
+
+    Definition of done:
+      type: object
+      description: |
+        # Definition of Done
+
+        A task is considered done when:
+
+        - Code is implemented
+
+        - Tests are written and passing
+
+        - Business rules are enforced
+
+        - Documentation is updated
+
+        - Code is reviewed
+
+        - No known bugs remain
+
+    Domain:
+      type: object
+      description: |
+        # Domain Overview
+
+        ## Core Concepts
+        - User
+
+        - Client
+
+        - Activity
+
+        ## Relationships
+        - A user owns clients
+
+        - A client has activities
+
+        - Activities belong to a user through a client
+
+    Database design:
+      type: object
+      description: |
+        # Database Design
+
+        ## Tables
+        - users
+
+        - clients
+
+        - activities
+
+        ## Design Principles
+        - Relational integrity
+
+        - Ownership enforcement
+
+        - Simplicity over optimization
+
+    Data strategy:
+      type: object
+      description: |
+        # Data Strategy
+
+        ## Ownership
+        All domain data is owned by a user.
+
+        ## Visibility
+        - Users only see their own data
+
+        - Admins can see all data
+
+        ## Integrity
+        Data integrity is enforced at application level.
+
+    Postman:
+      type: object
+      description: |
+        # Postman
+
+        Postman can be used as a complementary tool to explore and test the API endpoints.
+
+        It is optional and does not replace tests or Swagger documentation.
+
+
+security:
+  - BearerAuth: []
+
+paths:
+  /login:
+    post:
+      summary: User login
+      tags: [Authentication]
+      description: Authenticates a user and returns an access token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  example: password
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "422":
+          description: Invalid credentials (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /me:
+    get:
+      summary: Health/auth check
+      tags: [Authentication]
+      description: "Returns { ok: true } when the request is authenticated."
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /clients:
+    get:
+      summary: List clients
+      tags: [Clients]
+      description: Returns clients visible to the authenticated user.
+      responses:
+        "200":
+          description: Clients list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientCollection"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create client
+      tags: [Clients]
+      description: Creates a new client owned by the authenticated user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientCreateRequest"
+      responses:
+        "201":
+          description: Client created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /clients/{id}:
+    get:
+      summary: Get client
+      tags: [Clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      responses:
+        "200":
+          description: Client found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update client
+      tags: [Clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientUpdateRequest"
+      responses:
+        "200":
+          description: Client updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    delete:
+      summary: Delete client
+      tags: [Clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      responses:
+        "204":
+          description: Client deleted
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /activities:
+    get:
+      summary: List activities
+      tags: [Activities]
+      description: Returns activities visible to the authenticated user.
+      responses:
+        "200":
+          description: Activities list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityCollection"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Create activity
+      tags: [Activities]
+      description: Creates a new activity for a client.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityCreateRequest"
+      responses:
+        "201":
+          description: Activity created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /activities/{id}:
+    get:
+      summary: Get activity
+      tags: [Activities]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      responses:
+        "200":
+          description: Activity found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      summary: Update activity
+      tags: [Activities]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityUpdateRequest"
+      responses:
+        "200":
+          description: Activity updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivityResource"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+    delete:
+      summary: Delete activity
+      tags: [Activities]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+          example: 1
+      responses:
+        "204":
+          description: Activity deleted
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
