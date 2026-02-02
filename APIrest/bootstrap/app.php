@@ -11,6 +11,8 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Support\Facades\Log;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,19 +22,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->api(append: [
+            \App\Http\Middleware\AttachRequestContext::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function(Throwable $e, Request $request) {
+        $exceptions->render(function(\Throwable $e, Request $request) {
             $isApi = $request->is('api/*') || $request->expectsJson();
 
             if(! $isApi) {
                 return null;
             }
 
-            $make = function(int $status, string $messege, $details = null) {
+            $make = function(int $status, string $message, $details = null) {
                 return response()->json([
-                    'message' => $messege,
+                    'message' => $message,
                     'details' => $details,
                 ], $status);
             };
@@ -67,6 +71,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 };
 
                 return $make($status, $message, null);
+            }
+
+            $status = $e instanceof HttpExceptionInterface
+                ? $e->getStatusCode()
+                : 500;
+
+            if($status >= 500) {
+                Log::error('Unhandled exception', [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'status' => $status,
+                    'request_id' => $request->attributes->get('request_id'),
+                ]);
             }
 
             return $make(500, 'Internal Server Error', null);
