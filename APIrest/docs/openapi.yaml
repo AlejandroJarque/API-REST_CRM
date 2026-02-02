@@ -4,23 +4,28 @@ info:
   title: CRM API
   version: "1.0.0"
   description: |
-    CRM REST API.
+    CRM REST API
 
-    This API provides access to a CRM system that manages clients and their related activities.
+      This API provides access to a Customer Relationship Management (CRM) system designed to manage clients and their related activities in a structured and secure way. It exposes a set of RESTful endpoints that allow authenticated users to create, read, update, and delete domain resources while enforcing strict ownership and authorization rules.
+      The API is intended to be consumed by frontend applications and third-party services that require reliable access to CRM data, with a strong emphasis on consistency, clarity, and predictable behavior.
+      
+      Authorization
 
-    Authorization:
-    - Protected endpoints require authentication using a Bearer token.
+       - All protected endpoints require authentication using a Bearer token.
 
-    - Users with the `admin` role can access all resources.
+       - Authentication is mandatory for accessing any domain resource.
 
-    - Users with the `user` role can only access resources they own.
+       - Users with the admin role have global access and can view and manage all resources in the system.
 
-    - When an authenticated user does not have sufficient permissions, the API responds with `403 Forbidden`.
+       - Users with the user role are restricted to accessing only the resources they own.
 
+       - When an authenticated user attempts to access a resource without sufficient permissions, the API responds with 403 Forbidden.
 
-    The API uses standard HTTP status codes and returns JSON error responses.
+      General Behavior
 
-    See `/docs` folder in the repository for more information.
+      The API follows standard REST principles and uses conventional HTTP status codes to communicate the result of each request. All responses are returned in JSON format, including error responses, which are structured and consistent across the API to simplify client-side handling and debugging.
+      This documentation serves as the single source of truth for the API contract. The behavior described here is enforced by automated tests, and documentation must always remain aligned with the actual implementation.
+
 
 servers:
   - url: /api/v1
@@ -49,72 +54,253 @@ components:
     Rest principles:
       type: object
       description: |
-        # REST Principles
+        # REST Principles and API Conventions
 
-        - Resource-oriented endpoints
+          This API strictly follows REST principles. Deviations without explicit justification are not permitted.
 
-        - Stateless requests
+          ## Mandatory Rules
+          - The API is stateless (sessions are not used).
 
-        - HTTP status codes used correctly
+          - JSON is the only accepted format for requests and responses.
 
-        - No RPC-style endpoints
+          - Resources are named in the plural.
+
+          - Examples: `/clients`, `/activities`, `/users`
+          - Correct use of HTTP verbs:
+
+          - GET: retrieve resources
+
+          - POST: create resources
+
+          - PATCH: partially update
+
+          - DELETE: delete resources
+
+          ## Design Conventions
+          - Each endpoint represents a resource, not an action.
+
+          - RPC-style endpoints (`/doSomething`, `/createClientNow`) are not allowed.
+
+          ## Justification
+          These rules ensure:
+          - Consistency across endpoints
+          - Ease of testing
+          - Better documentation (OpenAPI, Postman)
+          - Better integration with frontends and third parties
+
+          ## API Base Path and Versioning
+
+          All endpoints are exposed under the following base path:
+
+          /api/v1
+
+          Any change that breaks backward compatibility requires a new version.
+
+          ## Allowed HTTP Status Codes
+
+          The API uses a limited and explicit set of HTTP status codes:
+
+          - 200 OK: Successful read or update
+          - 201 Created: Resource successfully created
+          - 204 No Content: Resource successfully deleted
+          - 401 Unauthorized: Request lacks valid authentication
+          - 403 Forbidden: Authenticated but not allowed to perform this action
+          - 404 Not Found: Resource does not exist or is not accessible
+          - 422 Unprocessable Entity: Validation errors
+
+          No other status codes are allowed unless explicitly justified.
+
+          ## Authorization Rules
+
+          The API distinguishes between two roles:
+
+          - user: can only access resources they own
+          - admin: has global access to all resources
+
+          Each endpoint must explicitly state which roles are allowed and how ownership is enforced.
+
+          ## Contract Authority
+
+          All HTTP contracts defined under docs/api must comply with the rules defined in this document.
+
+          Any endpoint that violates these principles is considered invalid.
 
     Api versioning:
       type: object
       description: |
         # API Versioning
 
-        ## Strategy
-        - URL-based versioning
+          ## Convention
+          All API routes must be versioned under the path:
 
-        - Example: /api/v1
+          /api/v1/...
 
-        ## Rules
-        - No breaking changes inside a version
+          Example:
 
-        - New versions for incompatible changes
+          /api/v1/clients
+
+          ## Justification
+          - Avoids silent breaking changes.
+
+          - Allows for API evolution without breaking existing integrations.
+
+          - Almost no initial cost, high long-term value.
+
+          ## Discarded Alternatives
+          - Versioning by headers:
+
+          - Greater friction on the frontend.
+
+          Less visibility in tools like Postman or Swagger.
+
+          ## Note
+          Currently, only `v1` exists, but the convention applies from the first endpoint.
 
     Error handling:
       type: object
       description: |
-        # Error Handling
+          # Error Handling and Status Codes
 
-        ## Error Format
-        Errors are returned in JSON format.
+          The API must respond consistently to errors.
 
-        ## Common Status Codes
-        - 401 Unauthorized
+          ## Allowed Status Codes
+          - 200 OK
+          - 201 Created
+          - 400 Bad Request
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+          - 422 Unprocessable Entity (validations)
+          - 500 Internal Server Error
 
-        - 403 Forbidden
+          ## Key Rule
+          Always returning `200` with a `success=false` flag is not allowed.
 
-        - 404 Not Found
+          HTTP semantics must be respected.
 
-        - 422 Unprocessable Entity
+          ## Standard Error Structure
+          Errors must include:
+          - A clear message for the frontend
+          - Useful information for debugging (when applicable)
+
+          /*```json
+          {
+            "message": "string",
+            "details": null | { "fields": { "field": ["error"] } }
+          }
+          */
+
+
+            ## Rationale
+            - Allows the frontend to handle errors deterministically.
+
+            - Facilitates automated testing.
+
+            - Improves observability and maintainability.
 
     Activities:
       type: object
       description: |
         # Activities API Contract
 
-        ## Resource Description
-        Activities represent actions associated with a client.
+          ## Resource Description
 
-        ## Endpoints
+          The activities resource represents actions or events performed in the context of a client.
+          Each activity belongs to a client, and indirectly to a user through that client.
 
-        ### GET /api/v1/activities
-        List all activities accessible to the authenticated user.
+          Activities are exposed as a top-level resource.
+          Ownership and access control are enforced via authorization rules, not URL nesting.
 
-        ### POST /api/v1/activities
-        Create a new activity.
 
-        ### GET /api/v1/activities/{activityId}
-        Retrieve a single activity by its identifier.
+          ## Endpoints
 
-        ### PATCH /api/v1/activities/{activityId}
-        Update an existing activity.
+          ### GET /api/v1/activities
 
-        ### DELETE /api/v1/activities/{activityId}
-        Delete an existing activity.
+          **Purpose**  
+          List all activities accessible to the authenticated user.
+
+          **Authorization**
+          - user: only activities belonging to the user’s own clients
+          - admin: all activities
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+
+
+          ### POST /api/v1/activities
+
+          **Purpose**  
+          Create a new activity.
+
+          **Authorization**
+          - user: only for clients owned by the user
+          - admin: for any client
+
+          **Notes**
+          - `client_id` is required
+          - `user_id` is derived from the client and cannot be provided by the request
+
+          **Status Codes**
+          - 201 Created
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 422 Unprocessable Entity
+
+
+          ### GET /api/v1/activities/{activityId}
+
+          **Purpose**  
+          Retrieve a single activity by its identifier.
+
+          **Authorization**
+          - user: only if the activity belongs to one of the user’s clients
+          - admin: any activity
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+
+
+          ### PATCH /api/v1/activities/{activityId}
+
+          **Purpose**  
+          Partially update an existing activity.
+
+          **Authorization**
+          - user: only if the activity belongs to one of the user’s clients
+          - admin: any activity
+
+          **Notes**
+          - Partial updates only (`PATCH`)
+          - Validation rules use `sometimes`
+          - Only validated fields are updated
+          - `client_id` and `user_id` cannot be modified
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+          - 422 Unprocessable Entity
+
+
+          ### DELETE /api/v1/activities/{activityId}
+
+          **Purpose**  
+          Delete an existing activity.
+
+          **Authorization**
+          - user: only if the activity belongs to one of the user’s clients
+          - admin: any activity
+
+          **Status Codes**
+          - 204 No Content
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
       properties:
         id:
           type: integer
@@ -142,25 +328,161 @@ components:
       description: |
         # Clients API Contract
 
-        ## Resource Description
-        The clients resource represents a collection of clients managed by the system.
+          ## Resource Description
 
-        ## Endpoints
+          The clients resource represents a collection of clients managed by the system.
+          Each client belongs to a user, unless accessed by an admin with global privileges.
 
-        ### GET /api/v1/clients
-        List all clients accessible to the authenticated user.
 
-        ### POST /api/v1/clients
-        Create a new client.
+          ## Endpoints
 
-        ### GET /api/v1/clients/{clientId}
-        Retrieve a single client by its identifier.
+          ### GET /api/v1/clients
 
-        ### PATCH /api/v1/clients/{clientId}
-        Update an existing client.
+          **Purpose**  
+          List all clients accessible to the authenticated user.
 
-        ### DELETE /api/v1/clients/{clientId}
-        Delete an existing client.
+          **Authorization**
+          - user: only own clients
+          - admin: all clients
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
+
+
+          ### POST /api/v1/clients
+
+          **Purpose**  
+          Create a new client.
+
+          **Authorization**
+          - user
+          - admin
+
+          **Status Codes**
+          - 201 Created
+          - 401 Unauthorized
+          - 422 Unprocessable Entity
+
+
+          ### GET /api/v1/clients/{clientId}
+
+          **Purpose**  
+          Retrieve a single client by its identifier.
+
+          **Authorization**
+          - user: only if the client is owned by the user
+          - admin: any client
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+
+
+          ### PATCH /api/v1/clients/{clientId}
+
+          **Purpose**  
+          Update an existing client.
+
+          **Authorization**
+          - user: only if the client is owned by the user
+          - admin: any client
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+          - 422 Unprocessable Entity
+
+
+          ### DELETE /api/v1/clients/{clientId}
+
+          **Purpose**  
+          Delete an existing client.
+
+          **Authorization**
+          - user: only if the client is owned by the user
+          - admin: any client
+
+          **Status Codes**
+          - 204 No Content
+          - 401 Unauthorized
+          - 403 Forbidden
+          - 404 Not Found
+
+
+          ## Request Payloads and Validation
+
+          ### Create Client (POST)
+
+          Accepted fields:
+
+          - `name` (required, string)
+          - `email` (required, valid email)
+          - `phone` (optional, string)
+          - `address` (optional, string)
+
+          Notes:
+          - `user_id` is NOT accepted from the request body.
+          - Ownership is always assigned from the authenticated user.
+
+          Validation Errors:
+          - Invalid payload returns **422 Unprocessable Entity**.
+
+          ### Update Client (PATCH)
+
+          Partial updates are supported.
+
+          Accepted fields (all optional):
+
+          - `name` (string)
+          - `email` (valid email)
+          - `phone` (string)
+          - `address` (string)
+
+          Validation Errors:
+          - Invalid fields return **422 Unprocessable Entity**.
+
+
+          ## Error Handling Strategy
+
+          The following rules apply consistently to all client endpoints:
+
+          - **401 Unauthorized**
+            - Request without a valid access token.
+
+          - **403 Forbidden**
+            - Authenticated user attempting to access a client they do not own.
+            - Applies even if the resource exists.
+
+          - **404 Not Found**
+            - Client does not exist.
+            - Handled automatically by route model binding.
+
+          - **422 Unprocessable Entity**
+            - Validation errors.
+            - Takes precedence over authorization errors for authenticated users.
+
+          cat >> docs/api/clients.md <<'MD'
+
+
+          ## Testing as Contract
+
+          The behavior described in this document is enforced by automated feature tests.
+
+          Tests cover:
+
+          - Authentication requirements
+          - Ownership and role-based authorization
+          - Correct HTTP status codes
+          - Validation rules
+          - Database side effects
+
+          No endpoint is considered valid unless all related tests are passing.
       properties:
         id:
           type: integer
@@ -195,171 +517,653 @@ components:
     Errors:
       type: object
       description: |
-        # Errors Reference
+        # API Error Handling Strategy
 
-        ## Validation Errors
-        Returned with status 422.
+          ## Overview
 
-        ## Authorization Errors
-        Returned with status 403.
+          This document defines the global error handling strategy for the API.
+          All endpoints must comply with the rules described here.
 
-        ## Authentication Errors
-        Returned with status 401.
+          The goal is to provide a consistent and predictable error model for all API consumers.
+
+          ## Authentication Errors
+
+          ### 401 Unauthorized
+
+          Returned when the request lacks valid authentication credentials.
+
+          Typical scenarios:
+          - Missing authentication token
+          - Invalid or expired authentication token
+
+          The client is expected to authenticate before retrying the request.
+
+
+          ## Authorization Errors
+
+          ### 403 Forbidden
+
+          Returned when the user is authenticated but does not have permission to perform the requested action.
+
+          Typical scenarios:
+          - User attempts to access a resource they do not own
+          - User role does not allow the operation
+
+
+          ## Resource Errors
+
+          ### 404 Not Found
+
+          Returned when the requested resource does not exist or is not accessible to the user.
+
+          This includes cases where the resource exists but the user is not authorized to know of its existence.
+
+          This behavior prevents information leakage.
+
+
+          ## Validation Errors
+
+          ### 422 Unprocessable Entity
+
+          Returned when the request payload is syntactically correct but fails domain validation rules.
+
+          Typical scenarios:
+          - Missing required fields
+          - Invalid field formats
+          - Business rule violations
+
+
+          ## Successful Operations
+
+          The API uses the following status codes for successful operations:
+
+          - 200 OK: Successful read or update
+          - 201 Created: Resource successfully created
+          - 204 No Content: Resource successfully deleted
+
+
+          ## Consistency Rules
+
+          - All endpoints must use only the status codes defined in this document
+          - No endpoint may introduce custom or undocumented error responses
+          - Error responses must follow a consistent structure (to be defined during implementation)
 
     Users:
       type: object
       description: |
-        # Users API
+        # Users API Contract
 
-        Users represent authenticated identities in the system.
+          ## Resource Description
 
-        ## Roles
-        - user
+          The users resource represents system users.
+          The API clearly distinguishes between self-service operations and administrative operations.
 
-        - admin
+
+          ## Endpoints
+
+          ### GET /api/v1/users/me
+
+          **Purpose**  
+          Retrieve the profile of the authenticated user.
+
+          **Authorization**
+          - user
+          - admin
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+
+
+          ### PUT /api/v1/users/me
+
+          **Purpose**  
+          Update the profile of the authenticated user.
+
+          **Authorization**
+          - user
+          - admin
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 422 Unprocessable Entity
+
+
+          ### GET /api/v1/users
+
+          **Purpose**  
+          List all users in the system.
+
+          **Authorization**
+          - admin only
+
+          **Status Codes**
+          - 200 OK
+          - 401 Unauthorized
+          - 403 Forbidden
     
     Security strategy:
       type: object
       description: |
         # Security Strategy
 
-        ## Principles
-        - The entire API will be protected by tokens.
+          ## Principles
+          - The entire API will be protected by tokens.
 
-        - Sessions are not used.
+          - Sessions are not used.
 
-        - Authentication is based on OAuth2 using Laravel Passport.
+          - Authentication is based on OAuth2 using Laravel Passport.
 
-        ## Separation of Duties
-        - Authentication: who you are
+          ## Separation of Duties
+          - Authentication: who you are
+          - Authorization: what you can do
 
-        - Authorization: what you can do
+          These responsibilities should not be mixed.
 
-        These responsibilities should not be mixed.
+          ## Initial Roles
+          - user: standard authenticated user
+          - admin: global operational access
 
-        ## Initial Roles
-        - user: standard authenticated user
-
-        - admin: global operational access
-
-        ## Discarded Alternatives
-        - Laravel Sanctum:
+          ## Discarded Alternatives
+          - Laravel Sanctum:
 
           - Does not fully meet the project's OAuth2 requirements.
 
-        ## Note
-        At this point, Passport is not installed or configured. Only the architectural decision is being made.
+          ## Note
+          At this point, Passport is not installed or configured. Only the architectural decision is being made.
 
     Testing strategy:
       type: object
       description: |
-        # Testing Strategy
+        # Testing Strategy (TDD)
 
-        ## Objectives
-        - Ensure API correctness
+          ## Principles
 
-        - Protect business rules
+          - Tests are the source of truth for the project.
+          - No endpoint is considered finished without tests.
+          - Behavior is defined before implementation.
+          - Manual testing is not a validation mechanism.
 
-        - Prevent regressions
+          ## Testing framework
 
-        ## Testing Levels
-        - Feature tests (primary)
+          - The project uses PHPUnit as the only testing framework.
+          - PHPUnit is natively integrated with Laravel and provides explicit, predictable tests.
+          - Mixing testing frameworks is not allowed.
 
-        - Unit tests (secondary)
+          ## Testing environment
 
-        ## Scope
-        - Authentication
+          All tests run in a dedicated testing environment:
 
-        - Authorization
+          - APP_ENV=testing
+          - Isolated database
+          - Ephemeral cache, session, and queue drivers
+          - No dependency on external services
 
-        - Validation
+          The testing environment is:
 
-        - Persistence
+          - Reproducible
+          - Disposable
+          - Safe (cannot affect local or development data)
 
-        ## Contract-Driven Tests
-        Tests define expected behavior. Documentation must never contradict tests.
+          ## Running tests
+
+          The test suite is executed using:
+
+          ```bash
+          php artisan test
 
     Definition of done:
       type: object
       description: |
-        # Definition of Done
+        # Definition of Done (DoD)
 
-        A task is considered done when:
+          A feature is considered complete only if it meets all the requirements of this checklist.
 
-        - Code is implemented
+          ## Checklist
+          - Written tests (if applicable)
+          - Tests passed
+          - Authorization applied correctly (if applicable)
+          - Consistent error handling
+          - Up-to-date documentation (if applicable)
+          - Validated Postman collection (if applicable)
+          - Branch ready for Pull Requests
 
-        - Tests are written and passing
+          ## Objective
+          - Avoid incomplete merges.
 
-        - Business rules are enforced
+          - Maintain a stable `develop` environment.
 
-        - Documentation is updated
-
-        - Code is reviewed
-
-        - No known bugs remain
+          - Eliminate ambiguity about what "done" means.
 
     Domain:
       type: object
       description: |
-        # Domain Overview
+        ## REST Resources
 
-        ## Core Concepts
-        - User
+          ### User
+          Represents an authenticable identity within the system.
 
-        - Client
+          It does not represent a client or a CRM person, but rather the actor operating the system.
 
-        - Activity
+          ### Client
+          Represents an entity managed by a user within the CRM.
 
-        ## Relationships
-        - A user owns clients
+          A client always exists within the context of a user.
 
-        - A client has activities
+          ### Activity
+          Represents an action or interaction performed on a client (calls, meetings, notes, etc.).
 
-        - Activities belong to a user through a client
+          ## Responsibilities by Resource
+
+          - User
+
+              - Authentication
+
+              - Role (user/admin)
+
+              - Ownership of clients and activities
+
+          - Client
+
+              - Client data
+
+              - Direct relationship with a user
+
+          - Activity
+
+              - Historical record of actions
+
+              - Always associated with a client
+
+              - Created by a user
+
+          ## Domain Relationships
+
+          - A user owns many clients
+          - A client belongs to a user
+          - A client has many activities
+          - An activity belongs to a client
+          - An activity is created by a user
+
+          ## Access Rules by Role
+
+          ### User
+          - Can only access their own clients
+          - Can only access their clients' activities
+          - Cannot view or modify other users' data
+
+          ### Admin
+          - Global access to all resources
+          - Can audit and manage any entity
+
+          ## Business Logic (Beyond CRUD)
+
+          - An activity cannot exist without a valid user client.
+          - Statistics per client:
+
+          - Total number of activities
+
+          - Last recorded activity
 
     Database design:
       type: object
       description: |
-        # Database Design
+        # Database Design — Relational Model
 
-        ## Tables
-        - users
+          ## Objective
 
-        - clients
+          To define the relational model that supports the system's domain and REST contracts before implementing migrations or models.
 
-        - activities
+          This document establishes tables, relationships, ownership, and integrity rules at a conceptual level, ensuring consistency with authorization and testing.
 
-        ## Design Principles
-        - Relational integrity
+          ## Tables and Purpose
 
-        - Ownership enforcement
+          ### users
+          Represents authenticated system users.
 
-        - Simplicity over optimization
+          Responsibilities:
+          - Authentication
+          - Client ownership
+          - Activity authorship
+
+          ### clients
+          Represents clients managed within the system.
+
+          Responsibilities:
+          - Contain client contact information
+          - Serve as the primary context for activities
+
+          ### activities
+          Represents actions performed on a client.
+
+          Responsibilities:
+          - Register business events
+          - Maintain historical traceability
+          - Associate action, client, and creator user
+
+          ## Relationships and Cardinalities
+
+          ### users → clients (ownership)
+
+          - A user can have multiple clients.
+
+          - Each client belongs to only one user.
+
+          Relationship:
+          - 1 user → N clients
+
+          Justification:
+          This relationship defines the primary ownership of the domain and is the basis for the authorization rules: a user can only access their own clients.
+
+          ### Clients → Activities
+
+          - A client can have many activities.
+
+          - Each activity belongs to a single client.
+
+          Relationship:
+          - 1 client → N activities
+
+          Justification:
+          - Activities without a client lose their meaning within the domain. This relationship guarantees traceability and business consistency.
+
+          ### Users → Activities (Authorship)
+
+          - A user can create many activities.
+
+          - Each activity is created by a single user.
+
+          Relationship:
+          - 1 user → N activities
+
+          Justification:
+          - Clearly distinguishes between:
+          - The client on whom the action is performed
+          - The user who executes the action
+
+          This allows for auditing, user-specific metrics, and future business rules.
+
+          ## Ownership and Authorization
+
+          - Primary ownership is established in the users → clients relationship.
+
+          - Access to activities is always through the client.
+
+          - - A user can only access:
+
+          - Their own clients
+
+          - The activities associated with those clients
+
+          This design allows for the implementation of simple and verifiable authorization policies.
+
+          ## Integrity Rules (Conceptual)
+
+          The model must comply with the following rules:
+
+          - A client cannot exist without a user.
+
+          - An activity cannot exist without a client.
+
+          - An activity cannot exist without a user creator.
+
+          These rules must be enforced later at the database, application, or both levels.
+
+          ## Testing Considerations
+
+          The design allows for:
+
+          - Simple creation of minimal data:
+
+          - user
+
+          - client associated with user
+
+          - activity associated with client and user
+          - Isolation of authorization scenarios:
+
+          - user A cannot access user B's data
+          - Avoidance of orphaned entities that complicate test cleanup
+
+          This model is compatible with simple and predictable factories and seeders.
+
+          ## Conscious Decisions
+
+          - No additional technical columns are defined at this point.
+
+          - No foreign keys or cascades are specified.
+
+          - No premature optimizations (indexes, denormalization) are added.
+
+          These decisions are postponed until the implementation phase.
+
+          ## State
+
+          This design validates the alignment between:
+          - Domain
+          - Persistence
+          - Authorization
+          - Testing
 
     Data strategy:
       type: object
       description: |
-        # Data Strategy
+        # Data Strategy: Factories & Seeders
 
-        ## Ownership
-        All domain data is owned by a user.
+          ## Purpose
 
-        ## Visibility
-        - Users only see their own data
+          This project uses a strict separation between factories and seeders to ensure:
 
-        - Admins can see all data
+          - Reliable and deterministic tests
+          - Fast test execution
+          - Clean separation between test data and development/demo data
 
-        ## Integrity
-        Data integrity is enforced at application level.
+          ---
+
+          ## Factories
+
+          Factories are designed as **scenario builders**, not random data generators.
+
+          They are used to:
+
+          - Create explicit ownership scenarios
+          - Support authorization tests
+          - Build complex relationships in a controlled way
+
+          ### Rules
+
+          - Factories are used by tests
+          - Tests must create all required data explicitly
+          - Factories must not contain business logic
+          - Factories must not depend on seeders
+
+          ### Available factories
+
+          - UserFactory
+          - ClientFactory (explicit user ownership)
+          - ActivityFactory (explicit user + client relations)
+
+          ---
+
+          ## Seeders
+
+          Seeders are intended **only for development and demo environments**.
+
+          They are used to:
+
+          - Populate local environments
+          - Facilitate manual API exploration
+          - Prepare data for Postman usage
+
+          ### Rules
+
+          - Seeders are never used in tests
+          - Seeders may use factories internally
+          - Seeder data must be reproducible and predictable
+
+          ### Available seeders
+
+          - DevelopmentUsersSeeder
+          - DevelopmentClientsSeeder
+          - DevelopmentActivitiesSeeder
+
+          They are orchestrated by `DatabaseSeeder`.
+
+          ---
+
+          ## Running seeders (development only)
+
+          ```bash
+          php artisan migrate:fresh --seed
 
     Postman:
       type: object
       description: |
-        # Postman
+        ## Postman Usage
 
-        Postman can be used as a complementary tool to explore and test the API endpoints.
+          Postman is used in this project only as a manual inspection and debugging tool.
 
-        It is optional and does not replace tests or Swagger documentation.
+          All API behavior is defined and validated by automated feature tests.
+          Postman must never be used as the primary validation mechanism.
+
+          ### When to use Postman
+
+          - Inspect real JSON responses
+          - Debug frontend integration issues
+          - Manually test access tokens
+          - Demonstrate API behavior
+
+          ### When NOT to use Postman
+
+          - To validate business rules
+          - To test authorization logic
+          - To replace automated tests
+          - To define API behavior
+
+          ### Setup
+
+          1. Create a Postman environment with:
+            - `api_url`
+            - `token`
+          2. Authenticate using the `/api/v1/login` endpoint
+          3. Use the returned token for authenticated requests
+
+          Postman collections are expected to reflect the documented API contract,
+          not define it.
+
+    Dashboard Response:
+      type: object
+      description: |
+          # Dashboard API
+
+            ## Overview
+
+            The Dashboard API provides an aggregated, read-only view of key metrics and alerts for the authenticated user. It is designed to be lightweight, fast, and aligned with existing authorization rules. The dashboard does not represent a persistent entity and has no CRUD operations.
+
+            ## Purpose
+
+            * Provide a single endpoint for frontend dashboards
+            * Reduce round-trips by aggregating counters and alerts
+            * Respect ownership and role-based access (user vs admin)
+            * Avoid introducing new domain entities or persistence
+
+            ## Endpoint
+
+            ```
+            GET /api/v1/dashboard
+            ```
+
+            ## Authentication
+
+            * Required: Bearer token (OAuth2 via Passport)
+            * Unauthorized requests return `401`
+
+            ## Authorization Rules
+
+            ### User
+
+            * `clients_count`: number of clients owned by the user
+            * `activities_count`: number of activities associated with the user's clients
+            * `pending_activities_alerts`: pending activities associated with the user's clients
+
+            ### Admin
+
+            * `clients_count`: total number of clients
+            * `activities_count`: total number of activities
+            * `pending_activities_alerts`: all pending activities
+
+            ## Definition of "Pending Activity"
+
+            An activity is considered **pending** when:
+
+            * `completed_at` is `NULL`
+
+            This rule is explicit, testable, and intentionally simple. Additional alert types may be introduced in the future.
+
+            ## Response Format
+
+            ```json
+            {
+              "clients_count": 5,
+              "activities_count": 12,
+              "pending_activities_alerts": [
+                {
+                  "activity_id": 42
+                }
+              ]
+            }
+            ```
+
+            ### Fields
+
+            * `clients_count` *(integer)*: Number of visible clients
+            * `activities_count` *(integer)*: Number of visible activities
+            * `pending_activities_alerts` *(array)*: List of pending activity alerts
+
+            Each alert currently contains:
+
+            * `activity_id`: Identifier of the pending activity
+
+            ## Status Codes
+
+            * `200 OK`: Dashboard loaded successfully
+            * `401 Unauthorized`: Missing or invalid authentication token
+
+            ## Design Notes
+
+            * Read-only endpoint
+            * No pagination (expected low alert volume)
+            * No caching (premature at this stage)
+            * No real-time updates or events
+            * No per-widget endpoints
+
+            ## Testing
+
+            The dashboard behavior is fully defined by feature tests covering:
+
+            * Authentication (401 without token)
+            * User vs admin visibility
+            * Correct counters per role
+            * Explicit pending activity rule
+
+            ## Evolution
+
+            This endpoint is intentionally designed to grow by adding new widgets or fields to the response without breaking existing consumers.
+      properties:
+        clients_count:
+          type: integer
+          description: Number of clients visible to the authenticated user
+          example: 5
+        activities_count:
+          type: integer
+          description: Number of activities visible to the authenticated user
+          example: 12
+        pending_activities_alerts:
+          type: array
+          description: List of pending activity alerts
+          items:
+            $ref: '#/components/schemas/PendingActivityAlert'
 
 
 security:
@@ -751,3 +1555,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /dashboard:
+    get:
+      summary: Aggregated dashboard
+      description: >
+        Returns aggregated counters and pending activity alerts according to the
+        authenticated user's role. This is a read-only endpoint.
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard loaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - clients_count
+                  - activities_count
+                  - pending_activities_alerts
+                properties:
+                  clients_count:
+                    type: integer
+                    description: Number of clients visible to the authenticated user
+                    example: 5
+                  activities_count:
+                    type: integer
+                    description: Number of activities visible to the authenticated user
+                    example: 12
+                  pending_activities_alerts:
+                    type: array
+                    description: List of pending activity alerts
+                    items:
+                      type: object
+                      required:
+                        - activity_id
+                      properties:
+                        activity_id:
+                          type: integer
+                          description: Identifier of the pending activity
+                          example: 42
+        '401':
+          description: Unauthorized authentication token is missing or invalid
