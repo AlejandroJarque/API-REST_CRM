@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ActivityController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\UsersController;
+
 
 Route::prefix('v1')->group(function() {
 
@@ -16,6 +18,10 @@ Route::prefix('v1')->group(function() {
                 'ok' => true,
             ]);
         });
+
+    Route::get('/users/me', [UsersController::class, 'me']);
+    Route::get('/users', [UsersController::class, 'index']);
+    Route::get('/users/{id}', [UsersController::class, 'show']);
 
     Route::get('/dashboard', DashboardController::class);
 
