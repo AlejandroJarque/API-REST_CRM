@@ -47,8 +47,29 @@ components:
 
   schemas:
     Role:
-      type: string
-      description: User role.
+      type: object
+      description: |
+        # Roles
+
+          Defines the authorization level of the user within the system.
+
+          Roles determine which actions a user is allowed to perform
+          and which API endpoints they can access.
+
+          Each role grants access to a specific set of API capabilities:
+
+          - user:
+            Can authenticate and access their own resources.
+            Can view their own user profile (/users/me).
+            Cannot list users or access other users' data.
+
+          - admin:
+            Has elevated privileges across the system.
+            Can list users and access any user profile.
+            Can access administrative and management endpoints.
+
+          Roles are assigned and managed internally by the system
+          and cannot be modified by regular users.
       enum: [admin, user]
 
     Rest principles:
@@ -642,6 +663,26 @@ components:
           - 200 OK
           - 401 Unauthorized
           - 403 Forbidden
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        role:
+          type: string
+          example: user
+        created_at:
+          type: string
+          example: "2026-02-03T10:00:00.000000Z"
+        updated_at:
+          type: string
+          example: "2026-02-03T10:00:00.000000Z"
     
     Security strategy:
       type: object
@@ -1600,3 +1641,87 @@ paths:
                           example: 42
         '401':
           description: Unauthorized authentication token is missing or invalid
+
+  /users/me:
+    get:
+      summary: Get own user profile
+      description: |
+        Returns the authenticated user's own profile.
+        Accessible by USER and ADMIN roles.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Own user profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+
+  /users:
+    get:
+      summary: List users (admin only)
+      description: |
+        Returns a list of users.
+        Accessible only by ADMIN role.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Forbidden
+
+  /users/{id}:
+    get:
+      summary: Get user by id (admin only)
+      description: |
+        Returns a specific user by id.
+        Accessible only by ADMIN role.
+        Returns 404 only if the user does not exist and the requester is admin.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+        "403":
+          description: Forbidden
+        "404":
+          description: User not found
