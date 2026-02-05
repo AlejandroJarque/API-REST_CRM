@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\ActivityController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\UsersController;
 use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Auth\MeController;
 
 
 
@@ -16,11 +17,7 @@ Route::prefix('v1')->group(function() {
     Route::post('/register', RegisterController::class);
 
     Route::middleware('auth:api')->group(function() {
-        Route::get('/me', function() {
-            return response()->json([
-                'ok' => true,
-            ]);
-        });
+        Route::get('/me', MeController::class);
 
     Route::get('/users/me', [UsersController::class, 'me']);
     Route::get('/users', [UsersController::class, 'index']);
