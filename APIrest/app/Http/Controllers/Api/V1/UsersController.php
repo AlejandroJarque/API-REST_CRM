@@ -9,19 +9,6 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    
-    public function me(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if (! $user) {
-            abort(401, 'Unauthenticated.');
-        }
-
-        return response()->json([
-            'data' => $user,
-        ]);
-    }
 
     public function index(Request $request): JsonResponse
     {
