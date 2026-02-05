@@ -6,11 +6,14 @@ use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ActivityController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\UsersController;
+use App\Http\Controllers\Api\Auth\RegisterController;
+
 
 
 Route::prefix('v1')->group(function() {
 
     Route::post('/login', LoginController::class);
+    Route::post('/register', RegisterController::class);
 
     Route::middleware('auth:api')->group(function() {
         Route::get('/me', function() {
