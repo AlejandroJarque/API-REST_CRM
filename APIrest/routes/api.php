@@ -6,20 +6,21 @@ use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\ActivityController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\UsersController;
+use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Auth\MeController;
+use App\Http\Controllers\Api\Auth\ProfileController;
+
 
 
 Route::prefix('v1')->group(function() {
 
     Route::post('/login', LoginController::class);
+    Route::post('/register', RegisterController::class);
 
     Route::middleware('auth:api')->group(function() {
-        Route::get('/me', function() {
-            return response()->json([
-                'ok' => true,
-            ]);
-        });
+        Route::get('/me', MeController::class);
 
-    Route::get('/users/me', [UsersController::class, 'me']);
+    
     Route::get('/users', [UsersController::class, 'index']);
     Route::get('/users/{id}', [UsersController::class, 'show']);
 
@@ -36,6 +37,11 @@ Route::prefix('v1')->group(function() {
     Route::get('/activities/{activity}', [ActivityController::class, 'show']);
     Route::patch('/activities/{activity}', [ActivityController::class, 'update']);
     Route::delete('/activities/{activity}', [ActivityController::class, 'destroy']);
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::patch('/profile', [ProfileController::class, 'update']);
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword']);
+
 
     });
 });

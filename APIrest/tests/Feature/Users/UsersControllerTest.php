@@ -15,17 +15,6 @@ class UsersControllerTest extends TestCase
         $this->getJson('/api/v1/users/me')->assertStatus(401);
     }
 
-    public function testUserCanSeeOwnProfile(): void
-    {
-        $user = User::factory()->create();
-
-        $res = $this->actingAs($user, 'api')->getJson('/api/v1/users/me');
-
-        $res->assertStatus(200);
-        $res->assertJsonPath('data.id', $user->id);
-        $res->assertJsonPath('data.email', $user->email);
-    }
-
     public function testUserCannotListUsers(): void
     {
         $user = User::factory()->create();

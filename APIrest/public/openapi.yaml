@@ -1246,6 +1246,53 @@ paths:
               schema:
                 $ref: "#/components/schemas/ValidationError"
 
+  /register:
+    post:
+      summary: User register
+      tags: [Authentication]
+      description: Creates a new user identity with role `user`. Does not return a token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              additionalProperties: false
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: new.user@example.com
+                password:
+                  type: string
+                  example: Password123
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: integer, example: 1 }
+                      name: { type: string, example: "new.user" }
+                      email: { type: string, format: email, example: "new.user@example.com" }
+                      role: { type: string, enum: [user, admin], example: user }
+                      created_at: { type: string, format: date-time }
+                      updated_at: { type: string, format: date-time }
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+
   /me:
     get:
       summary: Health/auth check
@@ -1725,3 +1772,126 @@ paths:
           description: Forbidden
         "404":
           description: User not found
+
+  /profile:
+    get:
+      summary: Get authenticated user profile
+      tags:
+        - Authentication
+      description: >
+        Returns the editable profile data of the authenticated user.
+        This endpoint represents the user's profile, not identity management.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+
+    patch:
+      summary: Update authenticated user profile
+      tags:
+        - Authentication
+      description: >
+        Updates the editable profile data of the authenticated user.
+        Only name and email can be modified.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - name
+                - email
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /profile/password:
+    patch:
+      summary: Change authenticated user password
+      tags:
+        - Authentication
+      description: >
+        Changes the password of the authenticated user.
+        The current password must be provided.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - current_password
+                - password
+                - password_confirmation
+              properties:
+                current_password:
+                  type: string
+                  example: OldPassword123
+                password:
+                  type: string
+                  example: NewPassword123
+                password_confirmation:
+                  type: string
+                  example: NewPassword123
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthenticated
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+
+
