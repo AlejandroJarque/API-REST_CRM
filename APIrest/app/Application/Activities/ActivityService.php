@@ -25,11 +25,20 @@ class ActivityService
     {
         $client = Client::query()->findOrFail($clientId);
 
-        $activity = Activity::query()->create([
-            'description' => $data['description'],
-            'client_id' => $client->id,
-            'user_id' => $client->user_id,
-        ]);
+        $payload = [
+        'title' => $data['title'],
+        'status' => $data['status'],
+        'date' => $data['date'],
+        'description' => $data['description'] ?? null,
+
+        'client_id' => $client->id,
+        'user_id' => $client->user_id,
+        'completed_at' => $data['status'] === Activity::STATUS_DONE
+            ? now()
+            : null,
+        ];
+
+        $activity = Activity::query()->create($payload);
 
         $this->onActivityCreated($activity);
 
@@ -39,6 +48,17 @@ class ActivityService
     public function update(Activity $activity, array $data): Activity
     {
         $activity->update($data);
+
+        if (array_key_exists('status', $data)) {
+            if ($data['status'] === Activity::STATUS_DONE) {
+                $activity->completed_at = now();
+            } else {
+                $activity->completed_at = null;
+            }
+
+            $activity->save();
+        }
+
         return $activity;
     }
 

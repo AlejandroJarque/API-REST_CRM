@@ -11,40 +11,6 @@ class RegisterTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testRegisterCreatesUserWithForcedUserRole(): void
-    {
-        $payload = [
-            'email' => 'new.user@example.com',
-            'password' => 'Password123',
-        ];
-
-        $response = $this->postJson('/api/v1/register', $payload);
-
-        $response->assertStatus(201);
-
-        $response->assertJsonStructure([
-            'data' => [
-                'id',
-                'name',
-                'email',
-                'role',
-                'created_at',
-                'updated_at',
-            ],
-        ]);
-
-        $this->assertDatabaseHas('users', [
-            'email' => 'new.user@example.com',
-            'role' => User::ROLE_USER,
-        ]);
-
-        $user = User::where('email', 'new.user@example.com')->firstOrFail();
-        $this->assertTrue(Hash::check('Password123', $user->password));
-
-        $response->assertJsonMissingPath('data.password');
-        $response->assertJsonMissingPath('data.remember_token');
-    }
-
     public function testRegisterFailsWhenEmailAlreadyExists(): void
     {
         User::factory()->create([

@@ -16,24 +16,24 @@ class RegisterController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', Password::min(8)->letters()->numbers()],
             'role' => ['prohibited'],
-            'name' => ['prohibited'],
+            'name' => ['required', 'string', 'max:255'],
         ]);
 
         $email = $validated['email'];
 
-        
         $name = Str::before($email, '@');
         $name = $name !== '' ? $name : 'user';
 
         $user = User::create([
             'name' => $name,
-            'email' => $email,
-            'password' => $validated['password'], 
-            'role' => User::ROLE_USER,            
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => User::ROLE_USER,
         ]);
 
         return response()->json([
             'data' => $user,
         ], 201);
     }
+
 }
