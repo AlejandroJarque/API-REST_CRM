@@ -22,7 +22,7 @@ class ActivityFactory extends Factory
         ];
     }
 
-    public function configure()
+    public function configure():static
     {
         return $this->afterMaking(function (Activity $activity) {
             if($activity->client && $activity->client->user_id) {

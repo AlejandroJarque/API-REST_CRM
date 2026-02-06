@@ -10,14 +10,8 @@ class MeController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        if (! $user) {
-            abort(401, 'Unauthenticated.');
-        }
-
         return response()->json([
-            'data' => $user,
+            'data' => $request->user(),
         ]);
     }
 }

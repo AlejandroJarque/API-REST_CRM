@@ -27,7 +27,6 @@ class Activity extends Model
         'description',
         'user_id',
         'client_id',
-        'description',
         'completed_at',
     ];
 

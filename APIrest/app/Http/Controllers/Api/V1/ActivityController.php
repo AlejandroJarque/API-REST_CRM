@@ -15,7 +15,7 @@ use Illuminate\Http\Response;
 
 class ActivityController extends Controller
 {
-    public function __construct(private readonly ActivityService $activites)
+    public function __construct(private readonly ActivityService $activities)
     {
         
     }
@@ -25,7 +25,7 @@ class ActivityController extends Controller
 
         $user = $request->user();
 
-        $activities = $this->activites->listFor($user);
+        $activities = $this->activities->listFor($user);
         
         return response()->json([
             'data' => $activities,
@@ -35,11 +35,11 @@ class ActivityController extends Controller
     public function store(StoreActivityRequest $request): JsonResponse
     {
         $validated = $request->validated();
+
         $client = Client::findOrFail($validated['client_id']);
+        $this->authorize('create', [Activity::class, $client]);
 
-        $this->authorize('create', [\App\Models\Activity::class, $client]);
-
-        $activity = $this->activites->createForClient(
+        $activity = $this->activities->createForClient(
             $validated['client_id'],
             $validated
         );
@@ -60,7 +60,7 @@ class ActivityController extends Controller
     {
         $this->authorize('update', $activity);
 
-        $activity = $this->activites->update($activity, $request->validated());
+        $activity = $this->activities->update($activity, $request->validated());
 
         return response()->json(['data' => $activity], 200);
     }
@@ -69,7 +69,7 @@ class ActivityController extends Controller
     {
         $this->authorize('delete', $activity);
 
-        $this->activites->delete($activity);
+        $this->activities->delete($activity);
         
         return response()->noContent();
     }

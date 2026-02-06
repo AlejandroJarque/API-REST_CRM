@@ -26,20 +26,17 @@ class ActivityService
         $client = Client::query()->findOrFail($clientId);
 
         $payload = [
-            'title' => $data['title'],
-            'status' => $data['status'],
-            'date' => $data['date'],
-            'description' => $data['description'] ?? null,
+        'title' => $data['title'],
+        'status' => $data['status'],
+        'date' => $data['date'],
+        'description' => $data['description'] ?? null,
 
-            'client_id' => $client->id,
-            'user_id' => $client->user_id,
+        'client_id' => $client->id,
+        'user_id' => $client->user_id,
+        'completed_at' => $data['status'] === Activity::STATUS_DONE
+            ? now()
+            : null,
         ];
-
-        if ($payload['status'] === Activity::STATUS_DONE) {
-            $payload['completed_at'] = now();
-        } else {
-            $payload['completed_at'] = null;
-        }
 
         $activity = Activity::query()->create($payload);
 
@@ -50,17 +47,19 @@ class ActivityService
 
     public function update(Activity $activity, array $data): Activity
     {
-        if (array_key_exists('status', $data)) {
-            if ($data['status'] === Activity::STATUS_DONE) {
-                $data['completed_at'] = now();
-            } else {
-                $data['completed_at'] = null;
-            }
-        }
-
         $activity->update($data);
 
-        return $activity->refresh();
+        if (array_key_exists('status', $data)) {
+            if ($data['status'] === Activity::STATUS_DONE) {
+                $activity->completed_at = now();
+            } else {
+                $activity->completed_at = null;
+            }
+
+            $activity->save();
+        }
+
+        return $activity;
     }
 
     public function delete(Activity $activity): void

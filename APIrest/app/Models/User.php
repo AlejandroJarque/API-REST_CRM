@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -62,6 +62,7 @@ class User extends Authenticatable
         return $this->hasMany(Activity::class);
     }
 
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -82,9 +83,18 @@ class User extends Authenticatable
 
     protected static function booted(): void
     {
-        static::saving(function(User $user) {
-            if(! in_array($user->role, self::roles(), true)) {
-                throw new \InvalidArgumentException('Invalid user role');
+        static::creating(function (User $user) {
+
+            if (empty($user->role)) {
+                $user->role = 'user';
+            }
+        });
+
+        static::saving(function (User $user) {
+            if (! in_array($user->role, self::roles(), true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'role' => ['Invalid user role'],
+                ]);
             }
         });
     }
