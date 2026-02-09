@@ -152,11 +152,12 @@ The project includes support for domain events and notifications:
    php artisan passport:install
    ```
 
-8. Start the development server
+8. Start the development server 
 
    ```bash
    php artisan serve
    ```
+
 
 ## Project Structure
 
