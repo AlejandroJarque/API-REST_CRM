@@ -151,12 +151,43 @@ The project includes support for domain events and notifications:
    ```bash
    php artisan passport:install
    ```
+Important: Authentication Setup
 
-8. Start the development server
+This project uses Laravel Passport for OAuth2 authentication.
+After running `php artisan passport:install`, the following files must exist:
+
+- storage/oauth-private.key
+- storage/oauth-public.key
+
+If these files are missing, authentication-related endpoints will return HTTP 500 errors.
+
+
+8. Start the development server 
 
    ```bash
    php artisan serve
    ```
+
+### Environment Configuration (.env)
+
+This project relies on environment-specific configuration. After copying
+.env.example to .env, the following variables must be properly configured.
+
+Application
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+Database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=crm
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+
+Frontend (CORS)
+FRONTEND_URL=http://localhost:5173
 
 ## Project Structure
 
