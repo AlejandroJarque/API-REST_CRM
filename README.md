@@ -162,7 +162,14 @@ After running `php artisan passport:install`, the following files must exist:
 If these files are missing, authentication-related endpoints will return HTTP 500 errors.
 
 
-8. Start the development server 
+9. Personal Access Client required 
+
+   ```bash
+   php artisan passport:client --personal
+   ```
+
+
+9. Start the development server 
 
    ```bash
    php artisan serve
