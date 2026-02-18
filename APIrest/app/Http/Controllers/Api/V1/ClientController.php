@@ -22,6 +22,8 @@ class ClientController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $this->authorize('viewAny', Client::class);
+
         $user = $request->user();
 
         if(! $user) {

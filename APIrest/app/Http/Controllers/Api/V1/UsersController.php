@@ -12,15 +12,7 @@ class UsersController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $auth = $request->user();
-
-        if (! $auth) {
-            abort(401, 'Unauthenticated.');
-        }
-
-        if (! $auth->isAdmin()) {
-            abort(403, 'Forbidden.');
-        }
+        $this->authorize('viewAny', User::class);
 
         $users = User::query()
             ->orderBy('id')
