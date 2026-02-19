@@ -10,6 +10,7 @@ use App\Application\Clients\ClientService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Http\Resources\V1\ClientResource;
 
 
 
@@ -24,17 +25,10 @@ class ClientController extends Controller
     {
         $this->authorize('viewAny', Client::class);
 
-        $user = $request->user();
-
-        if(! $user) {
-            abort(401, 'Unauthenticated.');
-        }
-
-        $clients = $this->clients->listFor($user);
+        $clients = $this->clients->listFor($request->user());
         
-        return response()->json([
-            'data'=>$clients,
-        ]);
+        return ClientResource::collection($clients)->response();
+        
     }
 
     public function store(StoreClientRequest $request): JsonResponse
@@ -44,16 +38,16 @@ class ClientController extends Controller
             $request->validated()
         );
 
-        return response()->json(['data' => $client], 201);
+        return (new ClientResource($client))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(Client $client): JsonResponse
     {
         $this->authorize('view', $client);
         
-        return response()->json([
-            'data' => $client,
-        ]);
+        return (new ClientResource($client))->response();
     }
 
     public function update(UpdateClientRequest $request, Client $client): JsonResponse
